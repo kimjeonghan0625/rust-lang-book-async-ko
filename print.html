@@ -1,0 +1,2563 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>The Rust Programming Language - Async</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language - Async</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="the-rust-programming-language---async"><a class="header" href="#the-rust-programming-language---async">The Rust Programming Language - Async</a></h1>
+<blockquote>
+<p>📘 <strong>번역 안내</strong><br />
+본 문서는 Rust 공식 도서 <a href="https://doc.rust-lang.org/book/">The Rust Programming Language</a>에 최근 추가된 비동기 프로그래밍 관련 챕터(<a href="https://doc.rust-lang.org/book/ch17-00-async-await.html">Fundamentals of Asynchronous Programming: Async, Await, Futures, and Streams</a>)를 한국어로 번역한 자료입니다. 이 챕터에 존재하는 본문의 다른 챕터에 대한 링크는 <a href="https://doc.rust-lang.org/book/">The Rust Programming Language</a>의 해당 부분으로 연결되도록 설정되어 있습니다.</p>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="비동기-프로그래밍의-기초-async-await-future-그리고-stream"><a class="header" href="#비동기-프로그래밍의-기초-async-await-future-그리고-stream">비동기 프로그래밍의 기초: Async, Await, Future, 그리고 Stream</a></h2>
+<p>많은 컴퓨터 작업은 완료까지 시간이 오래 걸릴 수 있습니다. 이러한 오래 걸리는 작업을 기다리는 동안 다른 일을 할 수 있다면 좋겠죠. 현대 컴퓨터는 한 번에 둘 이상의 작업을 처리할 수 있는 두 가지 기법, 즉 병렬성과 동시성을 제공합니다. 하지만 병렬 또는 동시 작업을 포함하는 프로그램을 작성하기 시작하면, 곧 <em>비동기 프로그래밍</em> 특유의 새로운 문제에 직면하게 됩니다. 비동기 프로그래밍에서는 작업이 시작된 순서대로 순차적으로 끝나지 않을 수 있기 때문입니다. 이 장에서는 16장에서 다룬 스레드를 활용한 병렬성과 동시성에 기반하여, 비동기 프로그래밍의 또 다른 접근법을 소개합니다. 여기에는 Rust의 Future, Stream, 이를 지원하는 <code>async</code>와 <code>await</code> 문법, 그리고 비동기 작업을 관리하고 조율하는 도구들이 포함됩니다.</p>
+<p>예를 들어 생각해봅시다. 가족 모임 영상을 편집해서 내보내는 작업을 하고 있다고 가정해 보세요. 이 작업은 몇 분에서 몇 시간까지 걸릴 수 있습니다. 영상 내보내기는 가능한 모든 CPU와 GPU 자원을 사용하려고 할 것입니다. 만약 CPU 코어가 하나뿐이고, 운영체제가 내보내기 작업이 끝날 때까지 그 작업을 멈추지 않고 <em>동기적으로</em> 실행한다면, 그 작업이 진행되는 동안 컴퓨터에서 다른 어떤 일도 할 수 없을 것입니다. 꽤 답답한 경험이겠죠. 다행히도, 컴퓨터의 운영체제는 내보내기 작업을 눈에 띄지 않게 자주 중단시켜서, 동시에 다른 작업도 할 수 있도록 해줍니다.</p>
+<p>이제 다른 사람이 공유한 영상을 다운로드한다고 가정해봅시다. 이 작업 역시 시간이 걸릴 수 있지만, CPU를 많이 사용하지는 않습니다. 이 경우에는 CPU가 네트워크로부터 데이터가 도착하기를 기다려야 합니다. 데이터가 도착하기 시작하면 바로 읽을 수 있지만, 모든 데이터가 도착하는 데에는 시간이 걸릴 수 있습니다. 영상이 매우 크다면, 모든 데이터를 불러오는 데 최소 1~2초가 걸릴 수도 있습니다. 이 정도 시간은 현대 프로세서에게는 매우 긴 시간입니다. 현대 프로세서는 1초에 수십억 번의 연산을 수행할 수 있기 때문이죠. 이 경우에도 운영체제는 네트워크 호출이 끝나기를 기다리는 동안, 눈에 띄지 않게 프로그램을 중단시켜 CPU가 다른 작업을 수행할 수 있도록 해줍니다.</p>
+<p>영상 내보내기 작업은 <em>CPU 바운드</em> 또는 <em>연산 바운드</em> 작업의 예시입니다. 이 작업은 컴퓨터의 CPU나 GPU가 데이터를 처리할 수 있는 속도, 그리고 그 연산 자원을 얼마나 할당할 수 있는지에 의해 제한됩니다. 반면, 영상 다운로드는 <em>IO 바운드</em> 작업의 예시입니다. 이 작업은 컴퓨터의 <em>입출력</em> 속도에 의해 제한되며, 네트워크를 통해 데이터를 전송할 수 있는 속도가 곧 작업의 최대 속도가 됩니다.</p>
+<p>이 두 예시 모두에서, 운영체제의 보이지 않는 인터럽트는 일종의 동시성을 제공합니다. 하지만 이러한 동시성은 전체 프로그램 수준에서만 발생합니다. 즉, 운영체제가 한 프로그램을 잠시 멈추고 다른 프로그램이 작업을 수행할 수 있도록 하는 것이죠. 하지만 많은 경우, 우리는 운영체제보다 훨씬 더 세밀한 수준에서 우리 프로그램을 이해하고 있기 때문에, 운영체제가 알아차릴 수 없는 동시성의 기회를 직접 찾아낼 수 있습니다.</p>
+<p>예를 들어, 파일 다운로드를 관리하는 도구를 만든다고 가정해봅시다. 하나의 다운로드를 시작해도 UI가 멈추지 않아야 하고, 사용자는 동시에 여러 개의 다운로드를 시작할 수 있어야 합니다. 하지만 네트워크와 상호작용하는 많은 운영체제 API는 <em>블로킹</em> 방식입니다. 즉, 처리 중인 데이터가 완전히 준비될 때까지 프로그램의 진행을 멈추게 됩니다.</p>
+<blockquote>
+<p>참고: 사실 따지고 보면 <em>대부분의</em> 함수 호출이 이런 식으로 동작합니다. 하지만 일반적으로 <em>블로킹</em> 이라는 용어는 파일, 네트워크, 또는 컴퓨터의 다른 자원과 상호작용하는 함수 호출에 사용됩니다. 왜냐하면 이런 경우에야말로 개별 프로그램이 해당 작업이 <em>논블로킹</em> 으로 동작할 때 이점을 얻을 수 있기 때문입니다.</p>
+</blockquote>
+<p>메인 스레드를 블로킹하지 않으려면 파일마다 별도의 스레드를 생성해서 다운로드하도록 할 수도 있습니다. 하지만 이런 방식은 스레드의 오버헤드가 점점 문제가 될 수 있습니다. 애초에 호출 자체가 블로킹되지 않는 것이 더 바람직합니다. 또한, 블로킹 코드에서처럼 직관적인 방식으로 코드를 작성할 수 있다면 더 좋겠죠. 예를 들어 아래와 같이 말입니다:</p>
+<pre><code class="language-rust ignore does_not_compile">let data = fetch_data_from(url).await;
+println!("{data}");</code></pre>
+<p>바로 이것이 Rust의 <em>async</em> (비동기) 추상화가 제공하는 기능입니다. 이 장에서는 async에 대해 다음과 같은 내용을 다룹니다:</p>
+<ul>
+<li>Rust의 <code>async</code>와 <code>await</code> 문법 사용법</li>
+<li>16장에서 살펴본 문제들을 async 모델로 어떻게 해결할 수 있는지</li>
+<li>멀티스레딩과 async가 어떻게 상호보완적인 해법을 제공하며, 많은 경우 이 둘을 결합할 수 있는지</li>
+</ul>
+<p>하지만 실제로 async가 어떻게 동작하는지 살펴보기 전에, 먼저 병렬성과 동시성의 차이점에 대해 간단히 짚고 넘어가겠습니다.</p>
+<h3 id="병렬성과-동시성"><a class="header" href="#병렬성과-동시성">병렬성과 동시성</a></h3>
+<p>지금까지는 병렬성과 동시성을 거의 같은 의미로 다뤘지만, 이제부터는 이 둘을 좀 더 정확하게 구분할 필요가 있습니다. 앞으로 실제로 코드를 작성하면서 그 차이가 드러나기 때문입니다.</p>
+<p>소프트웨어 프로젝트에서 팀이 작업을 분담하는 여러 가지 방법을 생각해봅시다. 한 명에게 여러 작업을 맡길 수도 있고, 각 팀원에게 하나씩 할당할 수도 있으며, 이 두 가지 방식을 섞어서 사용할 수도 있습니다.</p>
+<p>한 사람이 여러 작업을 동시에 끝내지 않고 번갈아가며 진행하는 경우, 이것이 바로 <em>동시성</em> 입니다. 예를 들어, 두 개의 서로 다른 프로젝트를 컴퓨터에 내려받아 작업하다가 한 프로젝트에서 막히거나 지루해지면 다른 프로젝트로 전환하는 상황을 생각해볼 수 있습니다. 한 사람이기 때문에 두 작업을 정확히 동시에 진행할 수는 없지만, 번갈아가며 한 번에 하나씩 작업을 진행할 수는 있습니다. 즉, 멀티태스킹을 통해 한 작업에서 다른 작업으로 전환하면서 조금씩 진전을 내는 것이죠(아래 Figure 17-1 참고).</p>
+<figure>
+<img src="img/trpl17-01.svg" class="center" alt="A diagram with boxes labeled Task A and Task B, with diamonds in them representing subtasks. There are arrows pointing from A1 to B1, B1 to A2, A2 to B2, B2 to A3, A3 to A4, and A4 to B3. The arrows between the subtasks cross the boxes between Task A and Task B." />
+<figcaption>Figure 17-1: 작업 A와 작업 B 사이를 번갈아가며 전환하는 동시적 워크플로우</figcaption>
+</figure>
+팀이 여러 작업을 각 팀원에게 하나씩 나누어 맡기고, 각자가 자신의 작업을 독립적으로 진행한다면 이것이 바로 _병렬성_ 입니다. 팀의 모든 구성원이 동시에 각자의 작업을 진행할 수 있습니다(아래 Figure 17-2 참고).
+<figure>
+<img src="img/trpl17-02.svg" class="center" alt="A diagram with boxes labeled Task A and Task B, with diamonds in them representing subtasks. There are arrows pointing from A1 to A2, A2 to A3, A3 to A4, B1 to B2, and B2 to B3. No arrows cross between the boxes for Task A and Task B." />
+<figcaption>Figure 17-2: 작업 A와 작업 B가 독립적으로 동시에 진행되는 병렬적 워크플로우</figcaption>
+</figure>
+<p>이러한 워크플로우 모두에서, 서로 다른 작업들 사이의 조율이 필요할 수 있습니다. 처음에는 한 사람에게 맡긴 작업이 다른 사람의 작업과 완전히 독립적이라고 <em>생각했을</em> 수도 있지만, 실제로는 팀의 다른 사람이 자신의 작업을 먼저 끝내야만 진행할 수 있는 경우도 있습니다. 일부 작업은 병렬로 처리할 수 있지만, 일부 작업은 실제로 <em>직렬적(serial)</em> 입니다. 즉, 반드시 순서대로, 하나씩 차례로만 진행될 수 있다는 뜻입니다(Figure 17-3 참고).</p>
+<figure>
+<img src="img/trpl17-03.svg" class="center" alt="A diagram with boxes labeled Task A and Task B, with diamonds in them representing subtasks. There are arrows pointing from A1 to A2, A2 to a pair of thick vertical lines like a “pause” symbol, from that symbol to A3, B1 to B2, B2 to B3, which is below that symbol, B3 to A3, and B3 to B4." />
+<figcaption>Figure 17-3: 작업 A와 작업 B가 독립적으로 진행되다가, 작업 A3이 작업 B3의 결과를 기다리며 병렬성과 직렬 처리가 혼합된 워크플로우</figcaption>
+</figure>
+<p>마찬가지로, 자신의 작업 중 하나가 또 다른 자신의 작업에 의존한다는 사실을 깨달을 수도 있습니다. 이 경우에도 동시적으로 진행하던 작업이 직렬적으로 바뀌게 됩니다.</p>
+<p>병렬성과 동시성은 서로 교차하기도 합니다. 만약 동료가 내가 맡은 작업이 끝나야만 자신의 작업을 진행할 수 있다면, 나는 아마도 그 작업에 모든 노력을 집중해 동료의 진행을 “언블록”하려 할 것입니다. 이때는 더 이상 병렬로도, 동시적으로도 작업할 수 없게 됩니다.</p>
+<p>이러한 기본적인 역학은 소프트웨어와 하드웨어에서도 동일하게 적용됩니다. 단일 CPU 코어를 가진 컴퓨터에서는 한 번에 하나의 작업만 처리할 수 있지만, 여전히 동시적으로 작업할 수 있습니다. 스레드, 프로세스, async와 같은 도구를 사용하면, 컴퓨터는 한 작업을 잠시 멈추고 다른 작업으로 전환한 뒤, 다시 처음 작업으로 돌아올 수 있습니다. 여러 CPU 코어가 있다면, 병렬로 작업도 가능합니다. 한 코어가 한 작업을 처리하는 동안, 다른 코어는 완전히 별개의 작업을 동시에 처리할 수 있습니다.</p>
+<p>Rust에서 async를 사용할 때는 항상 동시성을 다루게 됩니다. 하드웨어, 운영체제, 그리고 사용하는 async 런타임(이에 대해서는 곧 설명합니다)에 따라, 이러한 동시성이 내부적으로 병렬성을 활용할 수도 있습니다.</p>
+<p>이제 Rust에서 비동기 프로그래밍이 실제로 어떻게 동작하는지 살펴보겠습니다.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="future와-async-문법"><a class="header" href="#future와-async-문법">Future와 Async 문법</a></h2>
+<p>Rust에서 비동기 프로그래밍의 핵심 요소는 <em>future</em>와 Rust의 <code>async</code>, <code>await</code> 키워드입니다.</p>
+<p><em>future</em>란 지금은 준비되지 않았지만 언젠가는 준비될 값입니다. (이와 비슷한 개념은 여러 언어에서 <em>task</em>나 <em>promise</em> 등 다양한 이름으로 등장합니다.) Rust는 다양한 비동기 연산을 서로 다른 데이터 구조로 구현하더라도 공통된 인터페이스를 제공할 수 있도록 <code>Future</code> 트레이트를 제공합니다. Rust에서 future는 <code>Future</code> 트레이트를 구현하는 타입입니다. 각 future는 자신만의 진행 상황과 "준비됨"이 무엇을 의미하는지에 대한 정보를 가지고 있습니다.</p>
+<p><code>async</code> 키워드는 블록이나 함수에 적용하여 해당 코드가 중단되고 다시 재개될 수 있음을 명시합니다. async 블록이나 async 함수 내부에서는 <code>await</code> 키워드를 사용해 <em>future를 기다릴</em> 수 있습니다(즉, future가 준비될 때까지 대기합니다). async 블록이나 함수 내에서 future를 await하는 모든 지점은 해당 블록이나 함수가 일시 중지되고 다시 시작될 수 있는 잠재적인 위치입니다. future가 값을 사용할 수 있는지 확인하는 과정을 <em>폴링(polling)</em> 이라고 합니다.</p>
+<p>C#나 JavaScript와 같은 다른 언어들도 비동기 프로그래밍을 위해 <code>async</code>와 <code>await</code> 키워드를 사용합니다. 만약 이러한 언어에 익숙하다면, Rust가 문법을 처리하는 방식 등에서 상당한 차이점이 있다는 것을 알 수 있을 것입니다. 이는 충분한 이유가 있기 때문이며, 곧 그 이유를 살펴보겠습니다!</p>
+<p>비동기 Rust 코드를 작성할 때는 대부분 <code>async</code>와 <code>await</code> 키워드를 사용합니다. Rust는 이 키워드들을 <code>Future</code> 트레이트를 활용하는 동등한 코드로 컴파일합니다. 이는 Rust가 <code>for</code> 루프를 <code>Iterator</code> 트레이트를 사용하는 코드로 변환하는 것과 비슷합니다. Rust는 <code>Future</code> 트레이트를 제공하기 때문에, 필요하다면 여러분만의 데이터 타입에 대해 직접 구현할 수도 있습니다. 이 장에서 살펴볼 많은 함수들은 각자 자신만의 <code>Future</code> 구현을 반환합니다. 트레이트의 정의와 동작 방식에 대해서는 이 장의 마지막에서 다시 다루겠지만, 지금은 이 정도만 알아도 앞으로 내용을 이해하는 데 충분합니다.</p>
+<p>이 모든 내용이 다소 추상적으로 느껴질 수 있으니, 실제로 첫 번째 async 프로그램을 작성해 보겠습니다. 간단한 웹 스크래퍼를 만들어볼 텐데요, 명령줄에서 두 개의 URL을 입력받아 둘 다 동시에 가져오고, 먼저 완료되는 결과를 반환할 것입니다. 이 예제에는 새로운 문법이 꽤 등장하지만 걱정하지 마세요—진행하면서 필요한 모든 내용을 하나씩 설명해드리겠습니다.</p>
+<h2 id="우리의-첫-번째-async-프로그램"><a class="header" href="#우리의-첫-번째-async-프로그램">우리의 첫 번째 Async 프로그램</a></h2>
+<p>이 장에서는 Rust 비동기 생태계의 다양한 부분을 다루기보다는 async 자체를 배우는 데 집중할 수 있도록, <code>trpl</code> 크레이트를 준비했습니다. (<code>trpl</code>은 “The Rust Programming Language”의 약자입니다.) 이 크레이트는 주로 <a href="https://crates.io/crates/futures"><code>futures</code></a><!-- ignore -->와 <a href="https://tokio.rs"><code>tokio</code></a><!-- ignore --> 크레이트에서 필요한 타입, 트레이트, 함수들을 모두 재내보냅니다. <code>futures</code> 크레이트는 Rust의 공식적인 비동기 실험 공간이며, 실제로 <code>Future</code> 트레이트가 처음 설계된 곳이기도 합니다. Tokio는 현재 Rust에서 가장 널리 사용되는 비동기 런타임으로, 특히 웹 애플리케이션에서 많이 쓰입니다. 이 외에도 훌륭한 런타임들이 많으며, 여러분의 목적에 더 적합한 것이 있을 수도 있습니다. 우리는 <code>trpl</code>의 내부 구현에 <code>tokio</code> 크레이트를 사용하는데, 이는 충분히 검증되었고 널리 사용되기 때문입니다.</p>
+<p>일부 경우에는, <code>trpl</code>이 원래의 API 이름을 바꾸거나 감싸서 이 장에서 중요한 부분에 집중할 수 있도록 했습니다. 크레이트가 실제로 어떤 일을 하는지 궁금하다면 <a href="https://github.com/rust-lang/book/tree/main/packages/trpl">소스 코드</a><!-- ignore -->를 직접 확인해 보시길 권장합니다. 각 재내보내기가 어떤 크레이트에서 왔는지 확인할 수 있고, 크레이트의 동작에 대해 자세한 주석도 남겨두었습니다.</p>
+<p>이제 <code>hello-async</code>라는 새 바이너리 프로젝트를 만들고, <code>trpl</code> 크레이트를 의존성에 추가해봅시다:</p>
+<pre><code class="language-console">$ cargo new hello-async
+$ cd hello-async
+$ cargo add trpl
+</code></pre>
+<p>이제 <code>trpl</code>이 제공하는 다양한 요소들을 활용해 우리의 첫 번째 async 프로그램을 작성해볼 수 있습니다. 두 개의 웹 페이지를 가져와 각각의 <code>&lt;title&gt;</code> 요소를 추출하고, 이 모든 과정을 가장 먼저 끝낸 페이지의 제목을 출력하는 간단한 커맨드라인 도구를 만들어보겠습니다.</p>
+<h3 id="page_title-함수-정의하기"><a class="header" href="#page_title-함수-정의하기">page_title 함수 정의하기</a></h3>
+<p>먼저, 하나의 페이지 URL을 매개변수로 받아 요청을 보내고, 해당 페이지의 <code>&lt;title&gt;</code> 요소의 텍스트를 반환하는 함수를 작성해봅시다(Listing 17-1 참고).</p>
+<Listing number="17-1" file-name="src/main.rs" caption="HTML 페이지에서 title 요소를 가져오는 async 함수 정의하기">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    // TODO: we'll add this next!
+</span><span class="boring">}
+</span><span class="boring">
+</span>use trpl::Html;
+
+async fn page_title(url: &amp;str) -&gt; Option&lt;String&gt; {
+    let response = trpl::get(url).await;
+    let response_text = response.text().await;
+    Html::parse(&amp;response_text)
+        .select_first("title")
+        .map(|title_element| title_element.inner_html())
+}</code></pre></pre>
+</Listing>
+<p>먼저, <code>page_title</code>라는 이름의 함수를 정의하고 <code>async</code> 키워드로 표시합니다. 그런 다음, 전달받은 URL을 가져오기 위해 <code>trpl::get</code> 함수를 사용하고, 응답을 기다리기 위해 <code>await</code> 키워드를 추가합니다. 응답의 텍스트를 얻기 위해서는 해당 응답의 <code>text</code> 메서드를 호출하고, 다시 한 번 <code>await</code> 키워드로 기다립니다. 이 두 단계 모두 비동기적으로 동작합니다. <code>get</code> 함수의 경우, 서버가 HTTP 헤더, 쿠키 등과 같은 응답의 첫 부분을 보내줄 때까지 기다려야 하며, 이 정보들은 응답 본문과 별도로 전달될 수 있습니다. 특히 본문이 매우 클 경우, 전체가 도착하는 데 시간이 걸릴 수 있습니다. 우리는 응답의 <em>전체</em>가 도착할 때까지 기다려야 하므로, <code>text</code> 메서드 역시 async입니다.</p>
+<p>이 두 future 모두를 명시적으로 await해야 합니다. Rust에서 future는 <em>게으르기(lazy)</em> 때문에, <code>await</code> 키워드를 사용해 요청하기 전까지 아무 일도 하지 않습니다. (실제로 future를 사용하지 않으면 Rust가 컴파일러 경고를 표시합니다.) 이는 13장에서 반복자(iterator)에 대해 다룬 <a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">반복자로 일련의 아이템들 처리하기</a><!-- ignore --> 부분을 떠올리게 할 수 있습니다. 반복자는 <code>next</code> 메서드를 직접 호출하거나, <code>for</code> 루프 또는 내부적으로 <code>next</code>를 사용하는 <code>map</code> 같은 메서드를 통해 호출하지 않는 한 아무 일도 하지 않습니다. 마찬가지로, future도 명시적으로 요청하지 않으면 아무 일도 하지 않습니다. 이러한 게으름(laziness) 덕분에 Rust는 실제로 필요할 때까지 비동기 코드를 실행하지 않을 수 있습니다.</p>
+<blockquote>
+<p>참고: 이는 이전 장에서 <a href="https://doc.rust-lang.org/book/ch16-01-threads.html#creating-a-new-thread-with-spawn">스레드 생성하기</a><!--ignore-->에서 <code>thread::spawn</code>을 사용할 때와는 다른 동작입니다. 그때는 다른 스레드에 전달한 클로저가 즉시 실행되기 시작했습니다. 또한, 많은 다른 언어에서 async를 다루는 방식과도 다릅니다. 하지만 Rust가 반복자에서와 마찬가지로 성능 보장을 제공하기 위해서는 이러한 동작이 중요합니다.</p>
+</blockquote>
+<p><code>response_text</code>를 얻은 후에는 <code>Html::parse</code>를 사용해 이를 <code>Html</code> 타입의 인스턴스로 파싱할 수 있습니다. 이제 단순한 문자열이 아니라, HTML을 더 풍부한 데이터 구조로 다룰 수 있는 타입을 갖게 됩니다. 특히, <code>select_first</code> 메서드를 사용하면 주어진 CSS 셀렉터에 해당하는 첫 번째 요소를 찾을 수 있습니다. 문자열 <code>"title"</code>을 전달하면, 문서 내에 <code>&lt;title&gt;</code> 요소가 있다면 그 중 첫 번째 요소를 가져옵니다. 일치하는 요소가 없을 수도 있기 때문에, <code>select_first</code>는 <code>Option&lt;ElementRef&gt;</code>를 반환합니다. 마지막으로, <code>Option</code>에 값이 있을 때만 해당 값으로 작업할 수 있도록 해주는 <code>Option::map</code> 메서드를 사용합니다. (여기서 <code>match</code> 표현식을 사용할 수도 있지만, <code>map</code>이 더 관용적입니다.) <code>map</code>에 전달하는 함수의 본문에서는 <code>title_element</code>에 대해 <code>inner_html</code>을 호출해 그 내용을 <code>String</code>으로 얻습니다. 이 모든 과정을 거치면, 최종적으로 <code>Option&lt;String&gt;</code>을 얻게 됩니다.</p>
+<p>Rust의 <code>await</code> 키워드는 기다릴 표현식 <em>뒤에</em> 위치한다는 점에 주목하세요. 즉, <em>접미사(postfix)</em> 키워드입니다. 만약 다른 언어에서 <code>async</code>를 사용해본 경험이 있다면 이 부분이 다르게 느껴질 수 있지만, Rust에서는 메서드 체이닝을 훨씬 더 깔끔하게 작성할 수 있게 해줍니다. 그 결과, Listing 17-2에서 보듯이 <code>page_title</code> 함수의 본문에서 <code>trpl::get</code>과 <code>text</code> 함수 호출을 <code>await</code>로 연결해 체이닝할 수 있습니다.</p>
+<Listing number="17-2" file-name="src/main.rs" caption="`await` 키워드로 체이닝하기">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use trpl::Html;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    // TODO: we'll add this next!
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">async fn page_title(url: &amp;str) -&gt; Option&lt;String&gt; {
+</span>    let response_text = trpl::get(url).await.text().await;
+<span class="boring">    Html::parse(&amp;response_text)
+</span><span class="boring">        .select_first("title")
+</span><span class="boring">        .map(|title_element| title_element.inner_html())
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p>이렇게 해서 우리의 첫 번째 async 함수를 성공적으로 작성했습니다! 이제 <code>main</code>에서 이 함수를 호출하는 코드를 추가하기 전에, 우리가 작성한 코드가 의미하는 바를 조금 더 살펴보겠습니다.</p>
+<p>Rust가 <code>async</code> 키워드가 붙은 블록을 만나면, 해당 블록을 <code>Future</code> 트레이트를 구현하는 고유하고 익명인 데이터 타입으로 컴파일합니다. 함수에 <code>async</code>가 붙으면, Rust는 해당 함수를 비동기 블록을 본문으로 갖는 일반 함수로 컴파일합니다. async 함수의 반환 타입은 컴파일러가 해당 async 블록을 위해 생성한 익명 타입이 됩니다.</p>
+<p>즉, <code>async fn</code>을 작성하는 것은 반환 타입의 <em>future</em>를 반환하는 함수를 작성하는 것과 같습니다. 컴파일러 입장에서는 Listing 17-1의 <code>async fn page_title</code>과 같은 함수 정의는 아래와 같이 비동기 함수가 아닌 형태로 정의한 것과 동등합니다:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">extern crate trpl; // required for mdbook test
+</span>use std::future::Future;
+use trpl::Html;
+
+fn page_title(url: &amp;str) -&gt; impl Future&lt;Output = Option&lt;String&gt;&gt; {
+    async move {
+        let text = trpl::get(url).await.text().await;
+        Html::parse(&amp;text)
+            .select_first("title")
+            .map(|title| title.inner_html())
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>변환된 버전의 각 부분을 살펴보겠습니다:</p>
+<ul>
+<li>10장에서 <a href="https://doc.rust-lang.org/book/ch10-02-traits.html#traits-as-parameters">“매개변수로서의 트레이트”</a><!-- ignore -->에서 다뤘던 <code>impl Trait</code> 문법을 사용합니다.</li>
+<li>반환되는 트레이트는 <code>Output</code>이라는 연관 타입을 가진 <code>Future</code>입니다. <code>Output</code> 타입이 <code>Option&lt;String&gt;</code>인 점에 주목하세요. 이는 <code>async fn</code> 버전의 <code>page_title</code>이 반환하던 타입과 동일합니다.</li>
+<li>원래 함수 본문에서 호출하던 모든 코드는 <code>async move</code> 블록으로 감싸집니다. 블록도 표현식이므로, 이 전체 블록이 함수에서 반환하는 표현식이 됩니다.</li>
+<li>이 async 블록은 앞서 설명한 대로 <code>Option&lt;String&gt;</code> 타입의 값을 생성합니다. 이 값이 반환 타입의 <code>Output</code> 타입과 일치합니다. 이는 여러분이 이미 본 다른 블록들과 동일한 방식입니다.</li>
+<li>새로운 함수 본문이 <code>async move</code> 블록인 이유는 <code>url</code> 파라미터의 사용 방식 때문입니다. (<code>async</code>와 <code>async move</code>의 차이점에 대해서는 이 장의 뒷부분에서 더 자세히 다룹니다.)</li>
+</ul>
+<p>이제 <code>main</code>에서 <code>page_title</code>을 호출할 수 있습니다.</p>
+<h2 id="단일-페이지의-제목-가져오기"><a class="header" href="#단일-페이지의-제목-가져오기">단일 페이지의 제목 가져오기</a></h2>
+<p>먼저, 한 페이지만의 제목을 가져와 보겠습니다. Listing 17-3에서는 12장에서 <a href="https://doc.rust-lang.org/book/ch12-01-accepting-command-line-arguments.html">커맨드라인 인자 받기</a><!-- ignore --> 절에서 사용했던 것과 동일한 패턴으로 커맨드라인 인자를 받아옵니다. 그런 다음 첫 번째 URL을 <code>page_title</code> 함수에 전달하고, 결과를 await합니다. future가 반환하는 값은 <code>Option&lt;String&gt;</code>이므로, 해당 페이지에 <code>&lt;title&gt;</code>이 있는지 여부에 따라 다른 메시지를 출력하기 위해 <code>match</code> 표현식을 사용합니다.</p>
+<Listing number="17-3" file-name="src/main.rs" caption="사용자가 입력한 인자를 받아 `main`에서 `page_title` 함수를 호출하기">
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use trpl::Html;
+</span><span class="boring">
+</span>async fn main() {
+    let args: Vec&lt;String&gt; = std::env::args().collect();
+    let url = &amp;args[1];
+    match page_title(url).await {
+        Some(title) =&gt; println!("The title for {url} was {title}"),
+        None =&gt; println!("{url} had no title"),
+    }
+}
+<span class="boring">
+</span><span class="boring">async fn page_title(url: &amp;str) -&gt; Option&lt;String&gt; {
+</span><span class="boring">    let response_text = trpl::get(url).await.text().await;
+</span><span class="boring">    Html::parse(&amp;response_text)
+</span><span class="boring">        .select_first("title")
+</span><span class="boring">        .map(|title_element| title_element.inner_html())
+</span><span class="boring">}</span></code></pre>
+</Listing>
+<p>안타깝게도 이 코드는 컴파일되지 않습니다. <code>await</code> 키워드는 오직 async 함수나 블록 안에서만 사용할 수 있으며, Rust에서는 특별한 함수인 <code>main</code>에 <code>async</code>를 붙이는 것을 허용하지 않습니다.</p>
+<!-- manual-regeneration
+cd listings/ch17-async-await/listing-17-03
+cargo build
+copy just the compiler error
+-->
+<pre><code class="language-text">error[E0752]: `main` function is not allowed to be `async`
+ --&gt; src/main.rs:6:1
+  |
+6 | async fn main() {
+  | ^^^^^^^^^^^^^^^ `main` function is not allowed to be `async`
+</code></pre>
+<p><code>main</code> 함수에 <code>async</code>를 붙일 수 없는 이유는, 비동기 코드는 <em>런타임(runtime)</em> 이 필요하기 때문입니다. 런타임이란 비동기 코드를 실제로 실행하는 세부 사항을 관리하는 Rust 크레이트입니다. 프로그램의 <code>main</code> 함수는 런타임을 <em>초기화</em>할 수는 있지만, 그 자체가 런타임은 아닙니다. (이유에 대해서는 곧 더 자세히 살펴보겠습니다.) 비동기 코드를 실행하는 모든 Rust 프로그램은 최소 한 곳에서 런타임을 설정하고 future를 실행합니다.</p>
+<p>비동기를 지원하는 대부분의 언어는 런타임을 내장하고 있지만, Rust는 그렇지 않습니다. 대신, 다양한 용도에 맞춰 서로 다른 트레이드오프를 가진 여러 비동기 런타임이 존재합니다. 예를 들어, 많은 CPU 코어와 대용량 RAM을 가진 고성능 웹 서버와, 단일 코어에 적은 RAM, 힙 할당이 불가능한 마이크로컨트롤러는 요구 사항이 매우 다릅니다. 이러한 런타임을 제공하는 크레이트들은 파일이나 네트워크 I/O와 같은 일반적인 기능의 비동기 버전도 함께 제공합니다.</p>
+<p>이 장과 이후의 예제에서는 <code>trpl</code> 크레이트의 <code>run</code> 함수를 사용할 것입니다. 이 함수는 future를 인자로 받아 끝까지 실행합니다. 내부적으로 <code>run</code>을 호출하면 future를 실행할 런타임이 설정되고, future가 완료되면 그 결과 값을 반환합니다.</p>
+<p><code>page_title</code>이 반환하는 future를 바로 <code>run</code>에 넘길 수도 있습니다. 이 경우 future가 완료되면, Listing 17-3에서 시도했던 것처럼 결과로 받은 <code>Option&lt;String&gt;</code>에 대해 match를 사용할 수 있습니다. 하지만 이 장의 대부분 예제(그리고 실제 비동기 코드)에서는 단일 async 함수 호출만 하는 것이 아니라 여러 작업을 수행하므로, 대신 <code>async</code> 블록을 넘기고 그 안에서 <code>page_title</code>의 결과를 명시적으로 await하는 방식을 사용할 것입니다(Listing 17-4 참고).</p>
+<Listing number="17-4" caption="`trpl::run`으로 async 블록을 await하기" file-name="src/main.rs">
+<!-- should_panic,noplayground because mdbook test does not pass args -->
+<pre><code class="language-rust should_panic noplayground"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use trpl::Html;
+</span><span class="boring">
+</span>fn main() {
+    let args: Vec&lt;String&gt; = std::env::args().collect();
+
+    trpl::run(async {
+        let url = &amp;args[1];
+        match page_title(url).await {
+            Some(title) =&gt; println!("The title for {url} was {title}"),
+            None =&gt; println!("{url} had no title"),
+        }
+    })
+}
+<span class="boring">
+</span><span class="boring">async fn page_title(url: &amp;str) -&gt; Option&lt;String&gt; {
+</span><span class="boring">    let response_text = trpl::get(url).await.text().await;
+</span><span class="boring">    Html::parse(&amp;response_text)
+</span><span class="boring">        .select_first("title")
+</span><span class="boring">        .map(|title_element| title_element.inner_html())
+</span><span class="boring">}</span></code></pre>
+</Listing>
+<p>이 코드를 실행하면, 처음에 기대했던 대로 동작하는 것을 확인할 수 있습니다:</p>
+<!-- manual-regeneration
+cd listings/ch17-async-await/listing-17-04
+cargo build # skip all the build noise
+cargo run https://www.rust-lang.org
+# copy the output here
+-->
+<pre><code class="language-console">$ cargo run -- https://www.rust-lang.org
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s
+     Running `target/debug/async_await 'https://www.rust-lang.org'`
+The title for https://www.rust-lang.org was
+            Rust Programming Language
+</code></pre>
+<p>휴—드디어 제대로 동작하는 async 코드를 작성했습니다! 하지만 두 사이트를 서로 경쟁시키는 코드를 추가하기 전에, 잠시 future가 어떻게 동작하는지 다시 살펴보겠습니다.</p>
+<p>각 <em>await 지점</em>—즉, 코드에서 <code>await</code> 키워드를 사용하는 모든 위치—은(는) 제어권이 런타임에 반환되는 지점을 의미합니다. 이를 가능하게 하려면, Rust는 async 블록에 관련된 상태를 추적해야 하며, 그래야 런타임이 다른 작업을 시작했다가 준비가 되면 다시 처음 작업을 진행할 수 있습니다. 이는 눈에 보이지 않는 상태 기계(state machine)로, 마치 각 await 지점에서 현재 상태를 저장하기 위해 아래와 같은 enum을 직접 작성한 것과 같습니다:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span>enum PageTitleFuture&lt;'a&gt; {
+    Initial { url: &amp;'a str },
+    GetAwaitPoint { url: &amp;'a str },
+    TextAwaitPoint { response: trpl::Response },
+}
+<span class="boring">}</span></code></pre></pre>
+<p>각 상태 간 전환 코드를 직접 작성하는 것은 번거롭고 오류가 발생하기 쉽습니다. 특히 나중에 더 많은 기능과 상태를 추가해야 할 때 더욱 그렇습니다. 다행히도 Rust 컴파일러는 async 코드에 대한 상태 기계 데이터 구조를 자동으로 생성하고 관리해줍니다. 데이터 구조에 대한 일반적인 소유권 및 차용 규칙도 모두 그대로 적용되며, 컴파일러가 이를 검사하고 유용한 오류 메시지도 제공합니다. 이 장의 뒷부분에서 이러한 오류 메시지의 예시도 살펴볼 예정입니다.</p>
+<p>궁극적으로 이 상태 기계를 실제로 실행하는 무언가가 필요하며, 바로 <em>런타임(runtime)</em> 이 그 역할을 합니다. (런타임과 관련된 자료를 찾아보면 <em>익스큐터(executor)</em> 라는 용어를 접할 수 있는데, 익스큐터는 런타임 중에서 async 코드를 실제로 실행하는 부분을 의미합니다.)</p>
+<p>이제 왜 컴파일러가 Listing 17-3에서 <code>main</code> 함수 자체를 async 함수로 만드는 것을 막았는지 이해할 수 있습니다. 만약 <code>main</code>이 async 함수였다면, <code>main</code>이 반환하는 future의 상태 기계를 관리할 무언가가 필요하지만, <code>main</code>은 프로그램의 시작점이기 때문입니다! 대신 우리는 <code>main</code> 함수에서 <code>trpl::run</code> 함수를 호출해 런타임을 설정하고, async 블록이 반환하는 future를 끝까지 실행하도록 했습니다.</p>
+<blockquote>
+<p>참고: 일부 런타임에서는 매크로를 제공하여 async <code>main</code> 함수를 작성할 <em>수도 있습니다</em>. 이러한 매크로는 <code>async fn main() { ... }</code>를 일반 <code>fn main</code>으로 변환하며, Listing 17-4에서 우리가 직접 했던 것과 동일하게 future를 끝까지 실행하는 함수를 호출하도록 만듭니다. 즉, <code>trpl::run</code>이 하는 방식과 같습니다.</p>
+</blockquote>
+<p>이제 지금까지 살펴본 내용을 바탕으로, 실제로 어떻게 동시성 코드를 작성할 수 있는지 함께 살펴보겠습니다.</p>
+<h3 id="두-url을-서로-경쟁시키기"><a class="header" href="#두-url을-서로-경쟁시키기">두 URL을 서로 경쟁시키기</a></h3>
+<p>Listing 17-5에서는 커맨드라인에서 전달받은 두 개의 URL을 <code>page_title</code> 함수에 넘기고, 이 둘을 경쟁(race)시킵니다.</p>
+<Listing number="17-5" caption="" file-name="src/main.rs">
+<!-- should_panic,noplayground because mdbook does not pass args -->
+<pre><code class="language-rust should_panic noplayground"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span>use trpl::{Either, Html};
+
+fn main() {
+    let args: Vec&lt;String&gt; = std::env::args().collect();
+
+    trpl::run(async {
+        let title_fut_1 = page_title(&amp;args[1]);
+        let title_fut_2 = page_title(&amp;args[2]);
+
+        let (url, maybe_title) =
+            match trpl::race(title_fut_1, title_fut_2).await {
+                Either::Left(left) =&gt; left,
+                Either::Right(right) =&gt; right,
+            };
+
+        println!("{url} returned first");
+        match maybe_title {
+            Some(title) =&gt; println!("Its page title is: '{title}'"),
+            None =&gt; println!("Its title could not be parsed."),
+        }
+    })
+}
+
+async fn page_title(url: &amp;str) -&gt; (&amp;str, Option&lt;String&gt;) {
+    let text = trpl::get(url).await.text().await;
+    let title = Html::parse(&amp;text)
+        .select_first("title")
+        .map(|title| title.inner_html());
+    (url, title)
+}</code></pre>
+</Listing>
+<p>먼저, 사용자가 입력한 각 URL에 대해 <code>page_title</code> 함수를 호출합니다. 이렇게 생성된 future를 각각 <code>title_fut_1</code>과 <code>title_fut_2</code>에 저장합니다. 이 future들은 아직 아무 일도 하지 않는다는 점을 기억하세요. future는 게으르기 때문에, 우리가 아직 await하지 않았기 때문입니다. 그런 다음 이 future들을 <code>trpl::race</code>에 전달하면, 둘 중 어떤 future가 먼저 완료되는지 알려주는 값을 반환합니다.</p>
+<blockquote>
+<p>참고: 내부적으로 <code>race</code>는 더 일반적인 함수인 <code>select</code>를 기반으로 구현되어 있습니다. 실제 Rust 코드에서는 <code>select</code> 함수를 더 자주 접하게 될 것입니다. <code>select</code> 함수는 <code>trpl::race</code> 함수로는 할 수 없는 다양한 작업을 수행할 수 있지만, 그만큼 추가적인 복잡성도 있으므로 지금은 자세히 다루지 않겠습니다.</p>
+</blockquote>
+<p>어느 future가 먼저 완료될지 예측할 수 없으므로, <code>Result</code> 타입을 반환하는 것은 적절하지 않습니다. 대신, <code>race</code> 함수는 우리가 이전에 본 적 없는 타입인 <code>trpl::Either</code>를 반환합니다. <code>Either</code> 타입은 두 가지 경우를 가질 수 있다는 점에서 <code>Result</code>와 비슷하지만, <code>Result</code>와 달리 성공이나 실패의 의미가 내포되어 있지 않습니다. 대신, <code>Left</code>와 <code>Right</code>를 사용해 “둘 중 하나”임을 나타냅니다:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Either&lt;A, B&gt; {
+    Left(A),
+    Right(B),
+}
+<span class="boring">}</span></code></pre></pre>
+<p><code>race</code> 함수는 먼저 완료된 future의 출력값을 <code>Left</code>로, 두 번째 future가 먼저 완료되면 그 출력값을 <code>Right</code>로 반환합니다. 이는 함수 호출 시 인자 순서와 일치합니다. 즉, 첫 번째 인자는 두 번째 인자의 왼쪽에 있으므로, 먼저 끝난 쪽이 <code>Left</code>가 됩니다.</p>
+<p>또한, <code>page_title</code> 함수가 전달받은 URL을 함께 반환하도록 수정했습니다. 이렇게 하면, 먼저 응답이 온 페이지에 <code>&lt;title&gt;</code> 요소가 없더라도 어떤 URL이 먼저 완료되었는지 의미 있는 메시지를 출력할 수 있습니다. 이 정보를 바탕으로, <code>println!</code> 출력도 어느 URL이 먼저 끝났고 해당 웹 페이지의 <code>&lt;title&gt;</code>이 무엇인지(또는 없는 경우) 함께 표시하도록 업데이트했습니다.</p>
+<p>이제 여러분은 간단한 웹 스크래퍼를 완성했습니다! 여러 URL을 입력해 명령줄 도구를 실행해 보세요. 어떤 사이트가 항상 더 빠른지, 혹은 실행할 때마다 더 빠른 사이트가 달라지는지 확인할 수 있습니다. 무엇보다도, 이제 future를 다루는 기본기를 익혔으니, 앞으로 async로 할 수 있는 더 깊은 내용들을 배워볼 준비가 되었습니다.</p>
+<!-- [impl-trait]: ch10-02-traits.html#traits-as-parameters -->
+<!-- TODO: map source link version to version of Rust? -->
+<div style="break-before: page; page-break-before: always;"></div><h2 id="async로-동시성-적용하기"><a class="header" href="#async로-동시성-적용하기">Async로 동시성 적용하기</a></h2>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="concurrency-with-async"></a></p>
+<p>이 섹션에서는 16장에서 스레드로 다루었던 동시성 문제들 중 일부에 async를 적용해 보겠습니다. 이미 앞에서 주요 개념들을 많이 다루었으므로, 이 섹션에서는 스레드와 future 간의 차이점에 집중하겠습니다.</p>
+<p>많은 경우, async를 사용한 동시성 작업을 위한 API는 스레드를 사용할 때와 매우 비슷합니다. 하지만 어떤 경우에는 상당히 다르기도 합니다. 스레드와 async의 API가 겉보기에는 비슷해 보여도, 실제 동작 방식은 종종 다르며, 거의 항상 성능 특성도 다릅니다.</p>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="counting"></a></p>
+<h3 id="spawn_task로-새로운-태스크-생성하기"><a class="header" href="#spawn_task로-새로운-태스크-생성하기"><code>spawn_task</code>로 새로운 태스크 생성하기</a></h3>
+<p><a href="https://doc.rust-lang.org/book/ch16-01-threads.html#creating-a-new-thread-with-spawn">스폰으로 새로운 스레드 생성하기</a><!-- ignore -->에서 처음으로 다뤘던 작업은 두 개의 별도 스레드에서 카운트 업을 하는 것이었습니다. 이번에는 async를 사용해 같은 작업을 해보겠습니다. <code>trpl</code> 크레이트는 <code>thread::spawn</code> API와 매우 비슷한 <code>spawn_task</code> 함수와, <code>thread::sleep</code> API의 async 버전인 <code>sleep</code> 함수를 제공합니다. 이 둘을 함께 사용해서 Listing 17-6과 같이 카운팅 예제를 구현할 수 있습니다.</p>
+<Listing number="17-6" caption="메인 태스크가 다른 내용을 출력하는 동안 새로운 태스크를 생성하여 출력하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span>use std::time::Duration;
+
+fn main() {
+    trpl::run(async {
+        trpl::spawn_task(async {
+            for i in 1..10 {
+                println!("hi number {i} from the first task!");
+                trpl::sleep(Duration::from_millis(500)).await;
+            }
+        });
+
+        for i in 1..5 {
+            println!("hi number {i} from the second task!");
+            trpl::sleep(Duration::from_millis(500)).await;
+        }
+    });
+}</code></pre></pre>
+</Listing>
+<p>출발점으로, 우리는 <code>main</code> 함수에서 <code>trpl::run</code>을 사용하여 최상위 함수가 async가 되도록 설정합니다.</p>
+<blockquote>
+<p>참고: 이 시점부터 이 장의 모든 예제는 <code>main</code>에서 <code>trpl::run</code>으로 감싸는 동일한 코드를 포함합니다. 따라서 이후에는 <code>main</code>과 마찬가지로 이 코드를 종종 생략할 것입니다. 하지만 실제 코드에는 반드시 포함해야 합니다!</p>
+</blockquote>
+<p>그런 다음, 해당 블록 안에 각각 <code>trpl::sleep</code> 호출이 들어 있는 두 개의 루프를 작성합니다. 각 루프는 다음 메시지를 보내기 전에 0.5초(500밀리초) 동안 대기합니다. 한 루프는 <code>trpl::spawn_task</code>의 본문에, 다른 하나는 최상위 <code>for</code> 루프에 넣습니다. 또한 <code>sleep</code> 호출 뒤에 <code>await</code>도 추가합니다.</p>
+<p>이 코드는 스레드 기반 구현과 유사하게 동작합니다. 실제로, 실행할 때 메시지가 터미널에 표시되는 순서가 매번 다를 수도 있습니다.</p>
+<!-- Not extracting output because changes to this output aren't significant;
+the changes are likely to be due to the threads running differently rather than
+changes in the compiler -->
+<pre><code class="language-text">hi number 1 from the second task!
+hi number 1 from the first task!
+hi number 2 from the first task!
+hi number 2 from the second task!
+hi number 3 from the first task!
+hi number 3 from the second task!
+hi number 4 from the first task!
+hi number 4 from the second task!
+hi number 5 from the first task!
+</code></pre>
+<p>이 버전은 메인 async 블록의 본문에 있는 <code>for</code> 루프가 끝나면 바로 종료됩니다. 이는 <code>spawn_task</code>로 생성한 태스크가 <code>main</code> 함수가 끝날 때 함께 종료되기 때문입니다. 태스크가 끝날 때까지 모두 실행되도록 하려면, 조인 핸들(join handle)을 사용해 첫 번째 태스크가 완료될 때까지 기다려야 합니다. 스레드에서는 <code>join</code> 메서드를 사용해 스레드가 끝날 때까지 “블록”했듯이, Listing 17-7에서는 <code>await</code>를 사용해 동일한 동작을 할 수 있습니다. 태스크 핸들 자체가 future이기 때문입니다. 이 future의 <code>Output</code> 타입은 <code>Result</code>이므로, <code>await</code>한 뒤에 <code>unwrap</code>도 해줍니다.</p>
+<Listing number="17-7" caption="조인 핸들에 `await`를 사용해 태스크를 끝까지 실행하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let handle = trpl::spawn_task(async {
+            for i in 1..10 {
+                println!("hi number {i} from the first task!");
+                trpl::sleep(Duration::from_millis(500)).await;
+            }
+        });
+
+        for i in 1..5 {
+            println!("hi number {i} from the second task!");
+            trpl::sleep(Duration::from_millis(500)).await;
+        }
+
+        handle.await.unwrap();
+<span class="boring">    });
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p>이 수정된 버전은 <em>두</em> 루프가 모두 끝날 때까지 실행됩니다.</p>
+<!-- Not extracting output because changes to this output aren't significant;
+the changes are likely to be due to the threads running differently rather than
+changes in the compiler -->
+<pre><code class="language-text">hi number 1 from the second task!
+hi number 1 from the first task!
+hi number 2 from the first task!
+hi number 2 from the second task!
+hi number 3 from the first task!
+hi number 3 from the second task!
+hi number 4 from the first task!
+hi number 4 from the second task!
+hi number 5 from the first task!
+hi number 6 from the first task!
+hi number 7 from the first task!
+hi number 8 from the first task!
+hi number 9 from the first task!
+</code></pre>
+<p>지금까지 살펴본 바로는 async와 스레드는 기본적으로 동일한 결과를 제공합니다. 단지 문법만 다를 뿐입니다. 즉, 조인 핸들에서 <code>join</code>을 호출하는 대신 <code>await</code>를 사용하고, <code>sleep</code> 호출에도 <code>await</code>를 붙입니다.</p>
+<p>더 큰 차이점은, 이를 위해 별도의 운영체제 스레드를 생성할 필요가 없다는 점입니다. 사실, 여기서는 태스크조차 생성할 필요가 없습니다. async 블록은 익명 future로 컴파일되므로, 각 루프를 async 블록에 넣고 런타임이 <code>trpl::join</code> 함수를 사용해 둘 다 완료될 때까지 실행하도록 할 수 있습니다.</p>
+<p><a href="https://doc.rust-lang.org/book/ch16-01-threads.html#waiting-for-all-threads-to-finish-using-join-handles">조인 핸들을 사용해 모든 스레드가 끝날 때까지 기다리기</a><!-- ignore --> 섹션에서는 <code>std::thread::spawn</code>을 호출할 때 반환되는 <code>JoinHandle</code> 타입의 <code>join</code> 메서드를 사용하는 방법을 보여주었습니다. <code>trpl::join</code> 함수는 future를 위한 것으로, 이와 유사하게 동작합니다. 두 개의 future를 전달하면, 두 future가 <em>모두</em> 완료될 때 각각의 출력을 튜플로 담아 반환하는 새로운 future를 생성합니다. 따라서 Listing 17-8에서는 <code>trpl::join</code>을 사용해 <code>fut1</code>과 <code>fut2</code>가 모두 끝날 때까지 기다립니다. 우리는 <code>fut1</code>과 <code>fut2</code>를 각각 await하지 않고, <code>trpl::join</code>이 만들어낸 새로운 future를 await합니다. 반환값은 두 개의 단위값을 담은 튜플이므로, 별도로 사용하지 않습니다.</p>
+<Listing number="17-8" caption="두 개의 익명 future를 기다리기 위해 `trpl::join` 사용하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let fut1 = async {
+            for i in 1..10 {
+                println!("hi number {i} from the first task!");
+                trpl::sleep(Duration::from_millis(500)).await;
+            }
+        };
+
+        let fut2 = async {
+            for i in 1..5 {
+                println!("hi number {i} from the second task!");
+                trpl::sleep(Duration::from_millis(500)).await;
+            }
+        };
+
+        trpl::join(fut1, fut2).await;
+<span class="boring">    });
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p>이 코드를 실행하면 두 future가 모두 끝날 때까지 실행되는 것을 볼 수 있습니다.</p>
+<!-- Not extracting output because changes to this output aren't significant;
+the changes are likely to be due to the threads running differently rather than
+changes in the compiler -->
+<pre><code class="language-text">hi number 1 from the first task!
+hi number 1 from the second task!
+hi number 2 from the first task!
+hi number 2 from the second task!
+hi number 3 from the first task!
+hi number 3 from the second task!
+hi number 4 from the first task!
+hi number 4 from the second task!
+hi number 5 from the first task!
+hi number 6 from the first task!
+hi number 7 from the first task!
+hi number 8 from the first task!
+hi number 9 from the first task!
+</code></pre>
+<p>이제는 매번 <em>정확히 같은</em> 순서로 결과가 출력되는 것을 볼 수 있습니다. 이는 스레드에서 보았던 것과는 매우 다릅니다. 그 이유는 <code>trpl::join</code> 함수가 <em>공정(fair)</em> 하게 동작하기 때문입니다. 즉, 각 future를 동일하게 자주 확인하며, 번갈아가며 처리하고, 한 future가 준비되어 있다고 해서 다른 future보다 앞서 나가도록 두지 않습니다. 스레드에서는 운영체제가 어떤 스레드를 확인할지, 얼마나 오래 실행할지 결정합니다. 반면, async Rust에서는 런타임이 어떤 태스크를 확인할지 결정합니다. (실제로는 async 런타임이 동시성 관리를 위해 내부적으로 운영체제 스레드를 사용할 수도 있기 때문에, 공정성을 보장하는 것이 더 복잡해질 수 있지만, 여전히 가능합니다!) 런타임이 모든 연산에 대해 반드시 공정성을 보장해야 하는 것은 아니며, 종종 공정성 여부를 선택할 수 있는 다양한 API를 제공합니다.</p>
+<p>아래와 같은 변형을 시도해 보며 future를 await할 때 어떤 결과가 나오는지 확인해 보세요:</p>
+<ul>
+<li>두 루프 중 하나 또는 둘 다에서 async 블록을 제거해 보세요.</li>
+<li>각 async 블록을 정의한 직후에 바로 await해 보세요.</li>
+<li>첫 번째 루프만 async 블록으로 감싸고, 두 번째 루프 본문 뒤에 해당 future를 await해 보세요.</li>
+</ul>
+<p>추가 도전 과제로, 각 경우에 코드를 실행하기 <em>전</em>에 어떤 출력이 나올지 스스로 예측해 보세요!</p>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="message-passing"></a></p>
+<h3 id="메시지-패싱을-사용한-두-태스크의-카운트-업"><a class="header" href="#메시지-패싱을-사용한-두-태스크의-카운트-업">메시지 패싱을 사용한 두 태스크의 카운트 업</a></h3>
+<p>future 간에 데이터를 공유하는 방법도 익숙할 것입니다. 이번에도 메시지 패싱을 사용할 것이지만, 이번에는 타입과 함수의 async 버전을 사용합니다. <a href="https://doc.rust-lang.org/book/ch16-02-message-passing.html">스레드 간 데이터 전달을 위한 메시지 패싱 사용하기</a><!-- ignore -->에서와는 약간 다른 접근을 통해, 스레드 기반 동시성과 future 기반 동시성의 주요 차이점을 보여주겠습니다. Listing 17-9에서는 별도의 태스크를 생성하지 않고, 단일 async 블록만 사용해 시작합니다. 이는 별도의 스레드를 생성했던 이전과는 다릅니다.</p>
+<Listing number="17-9" caption="async 채널을 생성하고 두 부분을 `tx`와 `rx`에 할당하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let (tx, mut rx) = trpl::channel();
+
+        let val = String::from("hi");
+        tx.send(val).unwrap();
+
+        let received = rx.recv().await.unwrap();
+        println!("Got: {received}");
+<span class="boring">    });
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p>여기서는 <code>trpl::channel</code>을 사용합니다. 이는 16장에서 스레드와 함께 사용했던 다중 생산자, 단일 소비자 채널 API의 async 버전입니다. async 버전의 API는 스레드 기반 버전과 거의 비슷하지만, 리시버 <code>rx</code>가 불변이 아닌 가변 참조를 사용하고, <code>recv</code> 메서드는 값을 직접 반환하는 대신 await해야 하는 future를 생성한다는 점이 다릅니다. 이제 우리는 송신자에서 수신자로 메시지를 보낼 수 있습니다. 별도의 스레드나 태스크를 생성할 필요 없이, 단순히 <code>rx.recv</code> 호출을 await하면 됩니다.</p>
+<p>동기식 <code>std::mpsc::channel</code>의 <code>Receiver::recv</code> 메서드는 메시지를 받을 때까지 블록합니다. 반면, <code>trpl::Receiver::recv</code> 메서드는 async이기 때문에 블록하지 않습니다. 메시지를 받거나 채널의 송신 측이 닫힐 때까지 런타임에 제어권을 넘깁니다. 반대로, <code>send</code> 호출은 await하지 않습니다. 블록하지 않기 때문입니다. 우리가 메시지를 보내는 채널이 버퍼 제한이 없기 때문에 await할 필요가 없습니다.</p>
+<blockquote>
+<p>참고: 이 모든 async 코드는 <code>trpl::run</code> 호출의 async 블록 안에서 실행되기 때문에, 그 내부에서는 블로킹을 피할 수 있습니다. 하지만 그 <em>외부</em>의 코드는 <code>run</code> 함수가 반환될 때까지 블록됩니다. 이것이 바로 <code>trpl::run</code> 함수의 핵심입니다. 즉, 어떤 async 코드 집합에서 블록할지, 그리고 어디서 동기 코드와 async 코드 간 전환이 일어날지 <em>직접 선택</em>할 수 있게 해줍니다. 대부분의 async 런타임에서 <code>run</code>은 실제로 이러한 이유로 <code>block_on</code>이라는 이름을 사용합니다.</p>
+</blockquote>
+<p>이 예제에서 두 가지를 주목하세요. 첫째, 메시지는 즉시 도착합니다. 둘째, 여기서 future를 사용하긴 했지만 아직 동시성은 없습니다. 이 리스트의 모든 동작은 future가 전혀 없을 때와 마찬가지로 순차적으로 실행됩니다.</p>
+<p>첫 번째 부분을 개선하기 위해, 여러 개의 메시지를 보내고 그 사이에 잠시씩 대기하는 코드를 Listing 17-10과 같이 작성해 보겠습니다.</p>
+<!-- We cannot test this one because it never stops! -->
+<Listing number="17-10" caption="async 채널을 통해 여러 메시지를 보내고, 각 메시지 사이에 `await`로 대기하기" file-name="src/main.rs">
+<pre><code class="language-rust ignore"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let (tx, mut rx) = trpl::channel();
+
+        let vals = vec![
+            String::from("hi"),
+            String::from("from"),
+            String::from("the"),
+            String::from("future"),
+        ];
+
+        for val in vals {
+            tx.send(val).unwrap();
+            trpl::sleep(Duration::from_millis(500)).await;
+        }
+
+        while let Some(value) = rx.recv().await {
+            println!("received '{value}'");
+        }
+<span class="boring">    });
+</span><span class="boring">}</span></code></pre>
+</Listing>
+<p>메시지를 보내는 것뿐만 아니라, 이제 메시지를 받아야 합니다. 이 경우에는 몇 개의 메시지가 들어올지 알고 있으므로, <code>rx.recv().await</code>를 네 번 호출해서 직접 받을 수도 있습니다. 하지만 실제 상황에서는 대개 몇 개의 메시지가 올지 <em>알 수 없으므로</em>, 더 이상 메시지가 없다는 것을 알 때까지 계속 기다려야 합니다.</p>
+<p>Listing 16-10에서는 동기 채널에서 받은 모든 항목을 처리하기 위해 <code>for</code> 루프를 사용했습니다. 하지만 Rust에는 아직 <em>비동기</em>로 들어오는 항목들에 대해 <code>for</code> 루프를 쓸 수 있는 방법이 없으므로, 여기서는 아직 보지 못한 루프인 <code>while let</code> 조건 루프를 사용해야 합니다. 이 루프는 <a href="https://doc.rust-lang.org/book/ch06-03-if-let.html"><em>if let</em>과 <em>let else</em>를 활용한 간결한 제어 흐름</a><!-- ignore -->에서 봤던 <code>if let</code> 구문의 루프 버전입니다. 지정한 패턴이 값과 계속 매칭되는 한 루프가 실행됩니다.</p>
+<p><code>rx.recv</code> 호출은 future를 생성하며, 우리는 이를 await합니다. 런타임은 future가 준비될 때까지 일시 중지합니다. 메시지가 도착하면 future는 메시지가 도착한 횟수만큼 <code>Some(message)</code>로 resolve됩니다. 채널이 닫히면, 메시지가 <em>하나도 오지 않았더라도</em> future는 더 이상 값이 없음을 나타내기 위해 <code>None</code>으로 resolve되어, 폴링(즉, await)도 중단해야 함을 알려줍니다.</p>
+<p><code>while let</code> 루프는 이 모든 과정을 하나로 묶어줍니다. <code>rx.recv().await</code>의 결과가 <em>Some(message)</em> 이면, 메시지에 접근할 수 있고, <em>if let</em>에서처럼 루프 본문에서 사용할 수 있습니다. 결과가 <em>None</em>이면 루프가 종료됩니다. 루프가 한 번 돌 때마다 다시 await 지점에 도달하므로, 런타임은 또다시 메시지가 도착할 때까지 일시 중지합니다.</p>
+<p>이제 코드는 모든 메시지를 성공적으로 보내고 받을 수 있습니다. 하지만 여전히 몇 가지 문제가 남아 있습니다. 첫째, 메시지가 0.5초 간격으로 도착하지 않고, 프로그램을 시작한 뒤 2초(2,000밀리초)가 지나 <em>한꺼번에</em> 도착합니다. 둘째, 이 프로그램은 종료되지 않고, 새로운 메시지를 영원히 기다립니다! <span class="keystroke">ctrl-c</span>로 강제 종료해야 합니다.</p>
+<p>우선, 왜 메시지가 각 메시지 사이에 지연이 있는 것이 아니라, 전체 지연이 끝난 뒤 한 번에 도착하는지 살펴봅시다. 하나의 async 블록 안에서는 코드에 등장하는 <code>await</code> 키워드의 순서가 실제 프로그램 실행 시점의 실행 순서와 동일합니다.</p>
+<p>Listing 17-10에는 async 블록이 하나뿐이므로, 그 안의 모든 코드는 순차적으로 실행됩니다. 여전히 동시성이 없는 셈입니다. 모든 <code>tx.send</code> 호출이 실행되고, 그 사이에 모든 <code>trpl::sleep</code> 호출과 await 지점이 끼어 있습니다. 그리고 나서야 <code>while let</code> 루프가 <code>recv</code> 호출의 await 지점을 통과할 수 있습니다.</p>
+<p>우리가 원하는 동작, 즉 각 메시지 사이에 sleep 지연이 발생하도록 하려면, <code>tx</code>와 <code>rx</code> 작업을 각각 별도의 async 블록에 넣어야 합니다. Listing 17-11에서처럼 말이죠. 그러면 런타임이 counting 예제에서처럼 <code>trpl::join</code>을 사용해 각각을 독립적으로 실행할 수 있습니다. 여기서도 개별 future가 아니라 <code>trpl::join</code> 호출의 결과를 await합니다. 만약 개별 future를 순서대로 await하면, 다시 순차적인 흐름으로 돌아가게 되며, 이는 우리가 <em>원하지 않는</em> 동작입니다.</p>
+<!-- We cannot test this one because it never stops! -->
+<Listing number="17-11" caption="`send`와 `recv`를 각각 별도의 `async` 블록으로 분리하고, 해당 블록의 future를 await하기" file-name="src/main.rs">
+<pre><code class="language-rust ignore"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span><span class="boring">        let (tx, mut rx) = trpl::channel();
+</span><span class="boring">
+</span>        let tx_fut = async {
+            let vals = vec![
+                String::from("hi"),
+                String::from("from"),
+                String::from("the"),
+                String::from("future"),
+            ];
+
+            for val in vals {
+                tx.send(val).unwrap();
+                trpl::sleep(Duration::from_millis(500)).await;
+            }
+        };
+
+        let rx_fut = async {
+            while let Some(value) = rx.recv().await {
+                println!("received '{value}'");
+            }
+        };
+
+        trpl::join(tx_fut, rx_fut).await;
+<span class="boring">    });
+</span><span class="boring">}</span></code></pre>
+</Listing>
+<p>Listing 17-11의 코드로 업데이트하면, 메시지가 2초가 지난 뒤 한꺼번에 출력되는 대신 500밀리초 간격으로 출력됩니다.</p>
+<p>하지만 프로그램은 여전히 종료되지 않습니다. 이는 <code>while let</code> 루프와 <code>trpl::join</code>의 상호작용 때문입니다:</p>
+<ul>
+<li><code>trpl::join</code>이 반환하는 future는 전달된 <em>두</em> future가 <em>모두</em> 완료되어야만 완료됩니다.</li>
+<li><code>tx</code> future는 <code>vals</code>의 마지막 메시지를 보낸 뒤 sleep이 끝나면 완료됩니다.</li>
+<li><code>rx</code> future는 <code>while let</code> 루프가 끝나야만 완료됩니다.</li>
+<li><code>while let</code> 루프는 <code>rx.recv</code>를 await한 결과가 <em>None</em>이 될 때까지 계속됩니다.</li>
+<li><code>rx.recv</code>를 await하면, 채널의 반대쪽 끝이 닫혀야만 <em>None</em>을 반환합니다.</li>
+<li>채널은 우리가 <code>rx.close</code>를 호출하거나, 송신자 쪽인 <code>tx</code>가 drop될 때에만 닫힙니다.</li>
+<li>우리는 어디에서도 <code>rx.close</code>를 호출하지 않고, <code>tx</code>는 <code>trpl::run</code>에 전달된 최상위 async 블록이 끝나야 drop됩니다.</li>
+<li>그런데 이 블록은 <code>trpl::join</code>이 완료될 때까지 대기하므로 끝날 수 없습니다. 이로 인해 다시 처음으로 돌아가게 됩니다.</li>
+</ul>
+<p><code>rx.close</code>를 호출해서 수동으로 <code>rx</code>를 닫을 수도 있지만, 그다지 적절한 방법은 아닙니다. 임의의 개수의 메시지만 처리하고 중단하면 프로그램이 종료되긴 하겠지만, 그 과정에서 메시지를 놓칠 수 있습니다. 우리는 <code>tx</code>가 함수가 끝나기 <em>전에</em> drop되도록 보장할 다른 방법이 필요합니다.</p>
+<p>현재 메시지를 보내는 async 블록은 <code>tx</code>를 빌려서 사용하고 있습니다. 메시지를 보내는 데 소유권이 필요하지 않기 때문입니다. 하지만 만약 <code>tx</code>를 해당 async 블록으로 <em>이동</em>할 수 있다면, 그 블록이 끝날 때 <code>tx</code>가 drop될 것입니다. 13장 <a href="https://doc.rust-lang.org/book/ch13-01-closures.html#capturing-references-or-moving-ownership">참조 캡처 또는 소유권 이동</a><!-- ignore -->에서 클로저에 <code>move</code> 키워드를 사용하는 방법을 배웠고, 16장 <a href="https://doc.rust-lang.org/book/ch16-01-threads.html#using-move-closures-with-threads">스레드에서 <code>move</code> 클로저 사용하기</a><!-- ignore -->에서 보았듯이, 스레드 작업 시 데이터를 클로저로 이동해야 할 때가 많습니다. async 블록에서도 기본적으로 동일한 원리가 적용되므로, <code>move</code> 키워드는 클로저와 마찬가지로 async 블록에도 사용할 수 있습니다.</p>
+<p>Listing 17-12에서는 메시지를 보내는 블록을 <code>async</code>에서 <code>async move</code>로 변경합니다. <em>이</em> 버전의 코드를 실행하면, 마지막 메시지가 전송되고 수신된 뒤 프로그램이 정상적으로 종료됩니다.</p>
+<Listing number="17-12" caption="Listing 17-11의 코드를 수정하여 모든 작업이 끝나면 올바르게 종료되도록 한 예제" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let (tx, mut rx) = trpl::channel();
+
+        let tx_fut = async move {
+            let vals = vec![
+                String::from("hi"),
+                String::from("from"),
+                String::from("the"),
+                String::from("future"),
+            ];
+
+            for val in vals {
+                tx.send(val).unwrap();
+                trpl::sleep(Duration::from_millis(500)).await;
+            }
+        };
+
+        let rx_fut = async {
+            while let Some(value) = rx.recv().await {
+                println!("received '{value}'");
+            }
+        };
+
+        trpl::join(tx_fut, rx_fut).await;
+<span class="boring">    });
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+이 async 채널 역시 다중 생산자 채널이므로, 여러 future에서 메시지를 보내고 싶다면 `tx`에 대해 `clone`을 호출할 수 있습니다. Listing 17-13에서처럼 사용할 수 있습니다.
+<Listing number="17-13" caption="여러 프로듀서를 async 블록과 함께 사용하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let (tx, mut rx) = trpl::channel();
+
+        let tx1 = tx.clone();
+        let tx1_fut = async move {
+            let vals = vec![
+                String::from("hi"),
+                String::from("from"),
+                String::from("the"),
+                String::from("future"),
+            ];
+
+            for val in vals {
+                tx1.send(val).unwrap();
+                trpl::sleep(Duration::from_millis(500)).await;
+            }
+        };
+
+        let rx_fut = async {
+            while let Some(value) = rx.recv().await {
+                println!("received '{value}'");
+            }
+        };
+
+        let tx_fut = async move {
+            let vals = vec![
+                String::from("more"),
+                String::from("messages"),
+                String::from("for"),
+                String::from("you"),
+            ];
+
+            for val in vals {
+                tx.send(val).unwrap();
+                trpl::sleep(Duration::from_millis(1500)).await;
+            }
+        };
+
+        trpl::join3(tx1_fut, tx_fut, rx_fut).await;
+<span class="boring">    });
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p>먼저, <code>tx</code>를 복제해서 첫 번째 async 블록 바깥에 <code>tx1</code>을 만듭니다. 그리고 이전에 <code>tx</code>를 이동했던 것처럼, <code>tx1</code>을 해당 블록으로 이동시킵니다. 그 다음, 원래의 <code>tx</code>는 <em>새로운</em> async 블록으로 이동시켜, 약간 더 느린 지연으로 메시지를 추가로 보냅니다. 이 새로운 async 블록을 메시지를 받는 async 블록 뒤에 두었지만, 앞에 두어도 상관없습니다. 중요한 것은 future를 <em>생성하는</em> 순서가 아니라, future를 <em>await</em>하는 순서입니다.</p>
+<p>메시지를 보내는 두 async 블록 모두가 <code>async move</code> 블록이어야, 두 블록이 끝날 때 각각의 <code>tx</code>와 <code>tx1</code>이 drop됩니다. 그렇지 않으면 처음에 겪었던 것처럼 무한 루프에 빠지게 됩니다. 마지막으로, 추가된 future를 처리하기 위해 <code>trpl::join</code> 대신 <code>trpl::join3</code>을 사용합니다.</p>
+<p>이제 두 개의 메시지 전송 future에서 온 모든 메시지를 볼 수 있습니다. 그리고 메시지 전송 future들이 메시지를 보낸 뒤 약간씩 다른 지연을 사용하기 때문에, 메시지들도 각각 다른 간격으로 수신됩니다.</p>
+<!-- Not extracting output because changes to this output aren't significant;
+the changes are likely to be due to the threads running differently rather than
+changes in the compiler -->
+<pre><code class="language-text">received 'hi'
+received 'more'
+received 'from'
+received 'the'
+received 'messages'
+received 'future'
+received 'for'
+received 'you'
+</code></pre>
+<p>좋은 시작이지만, 이 방식은 우리가 사용할 수 있는 future의 수를 제한합니다. 즉, <code>join</code>을 사용하면 두 개, <code>join3</code>을 사용하면 세 개까지만 가능합니다. 더 많은 future를 다루려면 어떻게 해야 할지 살펴봅시다.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="여러-future-다루기"><a class="header" href="#여러-future-다루기">여러 Future 다루기</a></h2>
+<p>이전 섹션에서 두 개의 future에서 세 개의 future로 바꿨을 때, <code>join</code>에서 <code>join3</code>으로 바꿔야 했습니다. future의 개수가 바뀔 때마다 매번 다른 함수를 호출해야 한다면 꽤 번거로울 것입니다. 다행히도, 임의 개수의 인자를 받을 수 있는 <code>join</code>의 매크로 형태가 있습니다. 이 매크로는 future들을 직접 await 해주기도 합니다. 따라서 Listing 17-13의 코드를 <code>join3</code> 대신 <code>join!</code>을 사용하도록 Listing 17-14와 같이 다시 쓸 수 있습니다.</p>
+<Listing number="17-14" caption="여러 future를 기다리기 위해 `join!` 사용하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span><span class="boring">        let (tx, mut rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">        let tx1 = tx.clone();
+</span><span class="boring">        let tx1_fut = async move {
+</span><span class="boring">            let vals = vec![
+</span><span class="boring">                String::from("hi"),
+</span><span class="boring">                String::from("from"),
+</span><span class="boring">                String::from("the"),
+</span><span class="boring">                String::from("future"),
+</span><span class="boring">            ];
+</span><span class="boring">
+</span><span class="boring">            for val in vals {
+</span><span class="boring">                tx1.send(val).unwrap();
+</span><span class="boring">                trpl::sleep(Duration::from_secs(1)).await;
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">
+</span><span class="boring">        let rx_fut = async {
+</span><span class="boring">            while let Some(value) = rx.recv().await {
+</span><span class="boring">                println!("received '{value}'");
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">
+</span><span class="boring">        let tx_fut = async move {
+</span><span class="boring">            let vals = vec![
+</span><span class="boring">                String::from("more"),
+</span><span class="boring">                String::from("messages"),
+</span><span class="boring">                String::from("for"),
+</span><span class="boring">                String::from("you"),
+</span><span class="boring">            ];
+</span><span class="boring">
+</span><span class="boring">            for val in vals {
+</span><span class="boring">                tx.send(val).unwrap();
+</span><span class="boring">                trpl::sleep(Duration::from_secs(1)).await;
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">
+</span>        trpl::join!(tx1_fut, tx_fut, rx_fut);
+<span class="boring">    });
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p>이 방식은 <code>join</code>, <code>join3</code>, <code>join4</code> 등으로 계속 바꿔가며 사용하는 것보다 확실히 개선된 방법입니다! 하지만 이 매크로 형태 역시 future의 개수를 미리 알고 있을 때만 동작합니다. 실제 Rust 코드에서는 future들을 컬렉션에 담아두고, 그 중 일부 또는 전부가 완료될 때까지 기다리는 패턴이 흔하게 사용됩니다.</p>
+<p>컬렉션에 있는 모든 future를 확인하려면, <em>모두</em>를 순회(iterate)하면서 join해야 합니다. <code>trpl::join_all</code> 함수는 <a href="https://doc.rust-lang.org/book/ch13-02-iterators.html#the-iterator-trait-and-the-next-method">이터레이터 트레잇과 <code>next</code> 메서드</a><!-- ignore --> (13장)에서 배운 것처럼, <code>Iterator</code> 트레잇을 구현하는 어떤 타입도 받을 수 있으므로 딱 맞는 도구처럼 보입니다. 이제 future들을 벡터에 담고, <code>join!</code> 대신 <code>join_all</code>을 사용하는 방법을 Listing 17-15에서 살펴보겠습니다.</p>
+<Listing number="17-15" caption="익명 future들을 벡터에 저장하고 `join_all` 호출하기">
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span><span class="boring">        let (tx, mut rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">        let tx1 = tx.clone();
+</span><span class="boring">        let tx1_fut = async move {
+</span><span class="boring">            let vals = vec![
+</span><span class="boring">                String::from("hi"),
+</span><span class="boring">                String::from("from"),
+</span><span class="boring">                String::from("the"),
+</span><span class="boring">                String::from("future"),
+</span><span class="boring">            ];
+</span><span class="boring">
+</span><span class="boring">            for val in vals {
+</span><span class="boring">                tx1.send(val).unwrap();
+</span><span class="boring">                trpl::sleep(Duration::from_secs(1)).await;
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">
+</span><span class="boring">        let rx_fut = async {
+</span><span class="boring">            while let Some(value) = rx.recv().await {
+</span><span class="boring">                println!("received '{value}'");
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">
+</span><span class="boring">        let tx_fut = async move {
+</span><span class="boring">            let vals = vec![
+</span><span class="boring">                String::from("more"),
+</span><span class="boring">                String::from("messages"),
+</span><span class="boring">                String::from("for"),
+</span><span class="boring">                String::from("you"),
+</span><span class="boring">            ];
+</span><span class="boring">
+</span><span class="boring">            for val in vals {
+</span><span class="boring">                tx.send(val).unwrap();
+</span><span class="boring">                trpl::sleep(Duration::from_secs(1)).await;
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">
+</span>        let futures = vec![tx1_fut, rx_fut, tx_fut];
+
+        trpl::join_all(futures).await;
+<span class="boring">    });
+</span><span class="boring">}</span></code></pre>
+</Listing>
+<p>안타깝게도, 이 코드는 컴파일되지 않습니다. 대신, 다음과 같은 에러가 발생합니다:</p>
+<!-- manual-regeneration
+cd listings/ch17-async-await/listing-17-15/
+cargo build
+copy just the compiler error
+-->
+<pre><code class="language-text">error[E0308]: mismatched types
+  --&gt; src/main.rs:45:37
+   |
+10 |         let tx1_fut = async move {
+   |                       ---------- the expected `async` block
+...
+24 |         let rx_fut = async {
+   |                      ----- the found `async` block
+...
+45 |         let futures = vec![tx1_fut, rx_fut, tx_fut];
+   |                                     ^^^^^^ expected `async` block, found a different `async` block
+   |
+   = note: expected `async` block `{async block@src/main.rs:10:23: 10:33}`
+              found `async` block `{async block@src/main.rs:24:22: 24:27}`
+   = note: no two async blocks, even if identical, have the same type
+   = help: consider pinning your async block and casting it to a trait object
+</code></pre>
+<p>이 점은 다소 놀라울 수 있습니다. 결국, async 블록 중 어느 것도 값을 반환하지 않으므로 각각은 <code>Future&lt;Output = ()&gt;</code>를 생성합니다. 하지만 <code>Future</code>는 트레잇이라는 점을 기억하세요. 컴파일러는 각 async 블록마다 고유한 열거형(enum)을 만듭니다. 서로 다른 구조체(struct)를 <code>Vec</code>에 넣을 수 없는 것처럼, 컴파일러가 생성한 서로 다른 열거형도 마찬가지로 <code>Vec</code>에 함께 담을 수 없습니다.</p>
+<p>이 문제를 해결하려면, 12장에서 <a href="https://doc.rust-lang.org/book/ch12-03-improving-error-handling-and-modularity.html"><em>run</em> 함수에서 에러 반환하기</a><!-- ignore -->에서 했던 것처럼 <em>트레잇 객체</em>를 사용해야 합니다. (트레잇 객체에 대해서는 18장에서 자세히 다룹니다.) 트레잇 객체를 사용하면, 이러한 익명 future 각각을 동일한 타입으로 다룰 수 있습니다. 왜냐하면 이들은 모두 <code>Future</code> 트레잇을 구현하기 때문입니다.</p>
+<blockquote>
+<p>참고: 8장의 <a href="https://doc.rust-lang.org/book/ch08-01-vectors.html#using-an-enum-to-store-multiple-types">여러 값을 저장하기 위해 열거형 사용하기</a><!-- ignore -->에서, <code>Vec</code>에 여러 타입을 담는 또 다른 방법으로 각 타입을 나타내는 열거형(enum)을 사용하는 방법을 다뤘습니다. 하지만 여기서는 그렇게 할 수 없습니다. 첫째, 이 경우에는 타입들이 익명이라 이름을 붙일 방법이 없습니다. 둘째, 우리가 벡터와 <code>join_all</code>을 사용하려는 이유는, 오직 <em>동일한 출력 타입</em>을 가지는 동적인 future 컬렉션을 다루고 싶기 때문입니다.</p>
+</blockquote>
+<p>먼저, Listing 17-16에서처럼 <code>vec!</code>에 담긴 각 future를 <code>Box::new</code>로 감쌉니다.</p>
+<Listing number="17-16" caption="`Box::new`을 사용해 `Vec`에 담긴 future들의 타입을 맞추기" file-name="src/main.rs">
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span><span class="boring">        let (tx, mut rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">        let tx1 = tx.clone();
+</span><span class="boring">        let tx1_fut = async move {
+</span><span class="boring">            let vals = vec![
+</span><span class="boring">                String::from("hi"),
+</span><span class="boring">                String::from("from"),
+</span><span class="boring">                String::from("the"),
+</span><span class="boring">                String::from("future"),
+</span><span class="boring">            ];
+</span><span class="boring">
+</span><span class="boring">            for val in vals {
+</span><span class="boring">                tx1.send(val).unwrap();
+</span><span class="boring">                trpl::sleep(Duration::from_secs(1)).await;
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">
+</span><span class="boring">        let rx_fut = async {
+</span><span class="boring">            while let Some(value) = rx.recv().await {
+</span><span class="boring">                println!("received '{value}'");
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">
+</span><span class="boring">        let tx_fut = async move {
+</span><span class="boring">            let vals = vec![
+</span><span class="boring">                String::from("more"),
+</span><span class="boring">                String::from("messages"),
+</span><span class="boring">                String::from("for"),
+</span><span class="boring">                String::from("you"),
+</span><span class="boring">            ];
+</span><span class="boring">
+</span><span class="boring">            for val in vals {
+</span><span class="boring">                tx.send(val).unwrap();
+</span><span class="boring">                trpl::sleep(Duration::from_secs(1)).await;
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">
+</span>        let futures =
+            vec![Box::new(tx1_fut), Box::new(rx_fut), Box::new(tx_fut)];
+
+        trpl::join_all(futures).await;
+<span class="boring">    });
+</span><span class="boring">}</span></code></pre>
+</Listing>
+<p>안타깝게도, 이 코드는 여전히 컴파일되지 않습니다. 실제로, 두 번째와 세 번째 <code>Box::new</code> 호출에서 앞서 봤던 것과 동일한 기본 에러가 발생하며, <code>Unpin</code> 트레잇과 관련된 새로운 에러도 나타납니다. <code>Unpin</code> 에러는 잠시 뒤에 다루겠습니다. 먼저, <code>Box::new</code> 호출에서 발생하는 타입 에러를 해결하기 위해 <code>futures</code> 변수의 타입을 명시적으로 지정해줍시다 (Listing 17-17 참고).</p>
+<Listing number="17-17" caption="명시적인 타입 선언으로 나머지 타입 불일치 에러 해결하기" file-name="src/main.rs">
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span><span class="boring">        let (tx, mut rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">        let tx1 = tx.clone();
+</span><span class="boring">        let tx1_fut = async move {
+</span><span class="boring">            let vals = vec![
+</span><span class="boring">                String::from("hi"),
+</span><span class="boring">                String::from("from"),
+</span><span class="boring">                String::from("the"),
+</span><span class="boring">                String::from("future"),
+</span><span class="boring">            ];
+</span><span class="boring">
+</span><span class="boring">            for val in vals {
+</span><span class="boring">                tx1.send(val).unwrap();
+</span><span class="boring">                trpl::sleep(Duration::from_secs(1)).await;
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">
+</span><span class="boring">        let rx_fut = async {
+</span><span class="boring">            while let Some(value) = rx.recv().await {
+</span><span class="boring">                println!("received '{value}'");
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">
+</span><span class="boring">        let tx_fut = async move {
+</span><span class="boring">            let vals = vec![
+</span><span class="boring">                String::from("more"),
+</span><span class="boring">                String::from("messages"),
+</span><span class="boring">                String::from("for"),
+</span><span class="boring">                String::from("you"),
+</span><span class="boring">            ];
+</span><span class="boring">
+</span><span class="boring">            for val in vals {
+</span><span class="boring">                tx.send(val).unwrap();
+</span><span class="boring">                trpl::sleep(Duration::from_secs(1)).await;
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">
+</span>        let futures: Vec&lt;Box&lt;dyn Future&lt;Output = ()&gt;&gt;&gt; =
+            vec![Box::new(tx1_fut), Box::new(rx_fut), Box::new(tx_fut)];
+<span class="boring">
+</span><span class="boring">        trpl::join_all(futures).await;
+</span><span class="boring">    });
+</span><span class="boring">}</span></code></pre>
+</Listing>
+<p>이 타입 선언은 조금 복잡하니, 단계별로 살펴보겠습니다.</p>
+<ol>
+<li>가장 안쪽 타입은 future 자체입니다. future의 출력이 단위 타입 <code>()</code>임을 명시적으로 <code>Future&lt;Output = ()&gt;</code>로 표시합니다.</li>
+<li>그런 다음, 트레잇에 <code>dyn</code>을 붙여 동적임을 나타냅니다.</li>
+<li>전체 트레잇 참조를 <code>Box</code>로 감쌉니다.</li>
+<li>마지막으로, <code>futures</code>가 이러한 항목들을 담는 <code>Vec</code>임을 명확히 명시합니다.</li>
+</ol>
+<p>이것만으로도 큰 차이가 생겼습니다. 이제 컴파일러를 실행하면 <code>Unpin</code>과 관련된 에러만 남게 됩니다. 비슷한 내용의 에러가 세 개 나오지만, 모두 거의 동일합니다.</p>
+<!-- manual-regeneration
+cd listings/ch17-async-await/listing-17-17
+cargo build
+# copy *only* the errors
+# fix the paths
+-->
+<pre><code class="language-text">error[E0277]: `dyn Future&lt;Output = ()&gt;` cannot be unpinned
+   --&gt; src/main.rs:49:24
+    |
+49  |         trpl::join_all(futures).await;
+    |         -------------- ^^^^^^^ the trait `Unpin` is not implemented for `dyn Future&lt;Output = ()&gt;`
+    |         |
+    |         required by a bound introduced by this call
+    |
+    = note: consider using the `pin!` macro
+            consider using `Box::pin` if you need to access the pinned value outside of the current scope
+    = note: required for `Box&lt;dyn Future&lt;Output = ()&gt;&gt;` to implement `Future`
+note: required by a bound in `join_all`
+   --&gt; file:///home/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-util-0.3.30/src/future/join_all.rs:105:14
+    |
+102 | pub fn join_all&lt;I&gt;(iter: I) -&gt; JoinAll&lt;I::Item&gt;
+    |        -------- required by a bound in this function
+...
+105 |     I::Item: Future,
+    |              ^^^^^^ required by this bound in `join_all`
+
+error[E0277]: `dyn Future&lt;Output = ()&gt;` cannot be unpinned
+  --&gt; src/main.rs:49:9
+   |
+49 |         trpl::join_all(futures).await;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^ the trait `Unpin` is not implemented for `dyn Future&lt;Output = ()&gt;`
+   |
+   = note: consider using the `pin!` macro
+           consider using `Box::pin` if you need to access the pinned value outside of the current scope
+   = note: required for `Box&lt;dyn Future&lt;Output = ()&gt;&gt;` to implement `Future`
+note: required by a bound in `futures_util::future::join_all::JoinAll`
+  --&gt; file:///home/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-util-0.3.30/src/future/join_all.rs:29:8
+   |
+27 | pub struct JoinAll&lt;F&gt;
+   |            ------- required by a bound in this struct
+28 | where
+29 |     F: Future,
+   |        ^^^^^^ required by this bound in `JoinAll`
+
+error[E0277]: `dyn Future&lt;Output = ()&gt;` cannot be unpinned
+  --&gt; src/main.rs:49:33
+   |
+49 |         trpl::join_all(futures).await;
+   |                                 ^^^^^ the trait `Unpin` is not implemented for `dyn Future&lt;Output = ()&gt;`
+   |
+   = note: consider using the `pin!` macro
+           consider using `Box::pin` if you need to access the pinned value outside of the current scope
+   = note: required for `Box&lt;dyn Future&lt;Output = ()&gt;&gt;` to implement `Future`
+note: required by a bound in `futures_util::future::join_all::JoinAll`
+  --&gt; file:///home/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-util-0.3.30/src/future/join_all.rs:29:8
+   |
+27 | pub struct JoinAll&lt;F&gt;
+   |            ------- required by a bound in this struct
+28 | where
+29 |     F: Future,
+   |        ^^^^^^ required by this bound in `JoinAll`
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `async_await` (bin "async_await") due to 3 previous errors
+</code></pre>
+<p>소화하기에 <em>꽤 많은</em> 내용이었으니, 하나씩 분해해서 살펴봅시다. 메시지의 첫 부분은 첫 번째 async 블록(<code>src/main.rs:8:23: 20:10</code>)이 <code>Unpin</code> 트레잇을 구현하지 않았다고 알려주며, 이를 해결하기 위해 <code>pin!</code>이나 <code>Box::pin</code>을 사용하라고 제안합니다. 이 장의 뒷부분에서 <code>Pin</code>과 <code>Unpin</code>에 대해 좀 더 자세히 다룰 예정입니다. 하지만 지금은 컴파일러의 조언을 따라 문제를 해결해 봅시다. Listing 17-18에서는 먼저 <code>std::pin</code>에서 <code>Pin</code>을 임포트합니다. 그 다음, <code>futures</code>의 타입 어노테이션을 각 <code>Box</code>를 감싸는 <code>Pin</code>으로 수정합니다. 마지막으로, 실제 future들을 pinning하기 위해 <code>Box::pin</code>을 사용합니다.</p>
+<Listing number="17-18" caption="`Pin`과 `Box::pin`을 사용해 `Vec`의 타입을 맞추기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span>use std::pin::Pin;
+
+// -- snip --
+
+<span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span><span class="boring">        let (tx, mut rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">        let tx1 = tx.clone();
+</span><span class="boring">        let tx1_fut = async move {
+</span><span class="boring">            let vals = vec![
+</span><span class="boring">                String::from("hi"),
+</span><span class="boring">                String::from("from"),
+</span><span class="boring">                String::from("the"),
+</span><span class="boring">                String::from("future"),
+</span><span class="boring">            ];
+</span><span class="boring">
+</span><span class="boring">            for val in vals {
+</span><span class="boring">                tx1.send(val).unwrap();
+</span><span class="boring">                trpl::sleep(Duration::from_secs(1)).await;
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">
+</span><span class="boring">        let rx_fut = async {
+</span><span class="boring">            while let Some(value) = rx.recv().await {
+</span><span class="boring">                println!("received '{value}'");
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">
+</span><span class="boring">        let tx_fut = async move {
+</span><span class="boring">            let vals = vec![
+</span><span class="boring">                String::from("more"),
+</span><span class="boring">                String::from("messages"),
+</span><span class="boring">                String::from("for"),
+</span><span class="boring">                String::from("you"),
+</span><span class="boring">            ];
+</span><span class="boring">
+</span><span class="boring">            for val in vals {
+</span><span class="boring">                tx.send(val).unwrap();
+</span><span class="boring">                trpl::sleep(Duration::from_secs(1)).await;
+</span><span class="boring">            }
+</span><span class="boring">        };
+</span><span class="boring">
+</span>        let futures: Vec&lt;Pin&lt;Box&lt;dyn Future&lt;Output = ()&gt;&gt;&gt;&gt; =
+            vec![Box::pin(tx1_fut), Box::pin(rx_fut), Box::pin(tx_fut)];
+<span class="boring">
+</span><span class="boring">        trpl::join_all(futures).await;
+</span><span class="boring">    });
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p>이제 이 코드를 컴파일하고 실행하면, 드디어 기대했던 출력 결과를 얻을 수 있습니다:</p>
+<!-- Not extracting output because changes to this output aren't significant;
+the changes are likely to be due to the threads running differently rather than
+changes in the compiler -->
+<pre><code class="language-text">received 'hi'
+received 'more'
+received 'from'
+received 'messages'
+received 'the'
+received 'for'
+received 'future'
+received 'you'
+</code></pre>
+<p>휴!</p>
+<p>여기서 더 살펴볼 내용이 조금 있습니다. 우선, <code>Pin&lt;Box&lt;T&gt;&gt;</code>를 사용하면 future들을 힙에 <code>Box</code>로 할당하게 되어 약간의 오버헤드가 발생합니다. 사실 우리는 타입을 맞추기 위해서만 힙 할당을 하고 있을 뿐, 실제로는 힙 할당이 꼭 필요한 것은 아닙니다. 어차피 이 future들은 해당 함수 내부에서만 사용되기 때문입니다. 앞서 언급했듯이, <code>Pin</code> 자체도 래퍼 타입이므로, <code>Box</code>를 사용했던 원래 이유였던 <code>Vec</code>에 단일 타입을 담는 이점을 힙 할당 없이도 얻을 수 있습니다. 각 future에 대해 <code>std::pin::pin</code> 매크로를 사용해 직접 <code>Pin</code>을 적용할 수 있습니다.</p>
+<p>하지만 여전히 핀된 참조의 타입을 명시적으로 지정해야 합니다. 그렇지 않으면 Rust는 이 값들을 우리가 <code>Vec</code>에 필요로 하는 동적 트레잇 객체로 해석하지 못합니다. 따라서 <code>std::pin</code>에서 <code>pin</code>을 임포트 목록에 추가해야 합니다. 그런 다음 future를 정의할 때마다 <code>pin!</code>을 사용하고, Listing 17-19처럼 <code>futures</code>를 동적 future 타입에 대한 핀된 가변 참조들의 <code>Vec</code>으로 정의할 수 있습니다.</p>
+<Listing number="17-19" caption="불필요한 힙 할당을 피하기 위해 `pin!` 매크로로 `Pin`을 직접 사용하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span>use std::pin::{Pin, pin};
+
+// -- snip --
+
+<span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span><span class="boring">        let (tx, mut rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">        let tx1 = tx.clone();
+</span>        let tx1_fut = pin!(async move {
+            // --snip--
+<span class="boring">            let vals = vec![
+</span><span class="boring">                String::from("hi"),
+</span><span class="boring">                String::from("from"),
+</span><span class="boring">                String::from("the"),
+</span><span class="boring">                String::from("future"),
+</span><span class="boring">            ];
+</span><span class="boring">
+</span><span class="boring">            for val in vals {
+</span><span class="boring">                tx1.send(val).unwrap();
+</span><span class="boring">                trpl::sleep(Duration::from_secs(1)).await;
+</span><span class="boring">            }
+</span>        });
+
+        let rx_fut = pin!(async {
+            // --snip--
+<span class="boring">            while let Some(value) = rx.recv().await {
+</span><span class="boring">                println!("received '{value}'");
+</span><span class="boring">            }
+</span>        });
+
+        let tx_fut = pin!(async move {
+            // --snip--
+<span class="boring">            let vals = vec![
+</span><span class="boring">                String::from("more"),
+</span><span class="boring">                String::from("messages"),
+</span><span class="boring">                String::from("for"),
+</span><span class="boring">                String::from("you"),
+</span><span class="boring">            ];
+</span><span class="boring">
+</span><span class="boring">            for val in vals {
+</span><span class="boring">                tx.send(val).unwrap();
+</span><span class="boring">                trpl::sleep(Duration::from_secs(1)).await;
+</span><span class="boring">            }
+</span>        });
+
+        let futures: Vec&lt;Pin&lt;&amp;mut dyn Future&lt;Output = ()&gt;&gt;&gt; =
+            vec![tx1_fut, rx_fut, tx_fut];
+<span class="boring">
+</span><span class="boring">        trpl::join_all(futures).await;
+</span><span class="boring">    });
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p>여기까지는 서로 다른 <code>Output</code> 타입을 가질 수 있다는 사실을 무시하고 진행해 왔습니다. 예를 들어, Listing 17-20에서 <code>a</code>의 익명 future는 <code>Future&lt;Output = u32&gt;</code>를 구현하고, <code>b</code>의 익명 future는 <code>Future&lt;Output = &amp;str&gt;</code>를 구현하며, <code>c</code>의 익명 future는 <code>Future&lt;Output = bool&gt;</code>을 구현합니다.</p>
+<Listing number="17-20" caption="서로 다른 타입을 가진 세 개의 future" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let a = async { 1u32 };
+        let b = async { "Hello!" };
+        let c = async { true };
+
+        let (a_result, b_result, c_result) = trpl::join!(a, b, c);
+        println!("{a_result}, {b_result}, {c_result}");
+<span class="boring">    });
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p><code>trpl::join!</code>을 사용하면 여러 future 타입을 한 번에 await할 수 있습니다. 이 매크로는 다양한 타입의 future를 받아서 해당 타입들의 튜플을 만들어줍니다. 반면, <code>trpl::join_all</code>은 사용할 수 없습니다. 이 함수는 전달된 모든 future가 동일한 타입이어야 하기 때문입니다. 바로 이 타입 에러 때문에 우리가 <code>Pin</code>을 사용하게 된 것이죠!</p>
+<p>이것은 근본적인 트레이드오프입니다. 만약 future들의 타입이 모두 같다면, 개수가 동적인 경우에는 <code>join_all</code>을 사용할 수 있습니다. 반대로 future들의 타입이 다르다면, 개수가 정해진 경우에만 <code>join</code> 함수나 <code>join!</code> 매크로를 사용할 수 있습니다. 이는 Rust에서 다른 타입을 다룰 때와 동일한 상황입니다. future는 특별한 것이 아니며, 단지 다루기 편한 문법이 추가된 것뿐입니다. 오히려 이것이 좋은 점이기도 합니다.</p>
+<h3 id="future-경주시키기"><a class="header" href="#future-경주시키기">Future 경주시키기</a></h3>
+<p><code>join</code> 계열의 함수와 매크로로 future들을 <em>조인</em>할 때는, <em>모든</em> future가 완료될 때까지 기다려야만 다음 단계로 넘어갈 수 있습니다. 하지만 때로는 여러 future 중 <em>일부</em>만 완료되면 바로 다음 단계로 넘어가고 싶을 때도 있습니다. 이는 마치 한 future와 다른 future를 경주시키는 것과 비슷합니다.</p>
+<p>Listing 17-21에서는 다시 한 번 <code>trpl::race</code>를 사용해 두 개의 future, <code>slow</code>와 <code>fast</code>를 서로 경주시키는 예제를 보여줍니다.</p>
+<Listing number="17-21" caption="`race`를 사용해 먼저 끝나는 future의 결과 얻기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let slow = async {
+            println!("'slow' started.");
+            trpl::sleep(Duration::from_millis(100)).await;
+            println!("'slow' finished.");
+        };
+
+        let fast = async {
+            println!("'fast' started.");
+            trpl::sleep(Duration::from_millis(50)).await;
+            println!("'fast' finished.");
+        };
+
+        trpl::race(slow, fast).await;
+<span class="boring">    });
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p>각 future는 실행을 시작할 때 메시지를 출력하고, <code>sleep</code>을 호출해 await 하면서 잠시 멈췄다가, 완료되면 다시 메시지를 출력합니다. 그런 다음 <code>slow</code>와 <code>fast</code>를 모두 <code>trpl::race</code>에 전달하고, 둘 중 하나가 끝날 때까지 기다립니다. (여기서 결과는 그리 놀랍지 않습니다. <code>fast</code>가 이깁니다.) <a href="https://doc.rust-lang.org/book/ch17-01-futures-and-syntax.html#our-first-async-program"><em>첫 번째 async 프로그램</em></a><!-- ignore -->에서 <code>race</code>를 사용했을 때와 달리, 여기서는 반환된 <code>Either</code> 인스턴스를 그냥 무시합니다. 왜냐하면 모든 흥미로운 동작이 async 블록 내부에서 일어나기 때문입니다.</p>
+<p>만약 <code>race</code>에 전달하는 인자의 순서를 바꾼다면, “started” 메시지의 출력 순서도 바뀐다는 점에 주목하세요. 비록 항상 <code>fast</code> future가 먼저 완료되더라도 말이죠. 이는 이 <code>race</code> 함수의 구현이 공정하지 않기 때문입니다. 인자로 전달된 future들을 항상 그 순서대로 실행합니다. 다른 구현체들은 <em>공정</em>해서 어떤 future를 먼저 poll할지 무작위로 선택하기도 합니다. 우리가 사용하는 <code>race</code> 구현이 공정하든 아니든, <em>하나</em>의 future는 본문에서 첫 번째 <code>await</code>까지 실행된 뒤에야 다른 태스크가 시작될 수 있습니다.</p>
+<p><a href="https://doc.rust-lang.org/book/ch17-01-futures-and-syntax.html#our-first-async-program"><em>첫 번째 async 프로그램</em></a><!-- ignore -->에서 설명했듯이, await 지점마다 Rust는 런타임에게 태스크를 일시 중단하고, 만약 await 중인 future가 준비되지 않았다면 다른 태스크로 전환할 기회를 줍니다. 그 반대도 마찬가지입니다. Rust는 오직 await 지점에서만 async 블록을 일시 중단하고 런타임에 제어권을 넘깁니다. await 지점 사이의 모든 코드는 동기적으로 실행됩니다.</p>
+<p>즉, await 지점 없이 async 블록에서 많은 작업을 수행하면, 해당 future가 다른 future들의 진행을 막게 됩니다. 이런 상황을 다른 future가 <em>굶주린다(starving)</em> 고 표현하기도 합니다. 경우에 따라서는 큰 문제가 아닐 수도 있습니다. 하지만 만약 비용이 많이 드는 초기화 작업이나 오래 걸리는 작업을 하거나, 특정 작업을 계속해서 수행하는 future가 있다면, 언제 어디서 런타임에 제어권을 넘길지 고민해야 합니다.</p>
+<p>마찬가지로, 오래 걸리는 블로킹 작업이 있다면, async는 프로그램의 여러 부분이 서로 관계를 맺을 수 있는 방법을 제공하는 유용한 도구가 될 수 있습니다.</p>
+<p>그렇다면 <em>어떻게</em> 이런 경우에 런타임에 제어권을 넘길 수 있을까요?</p>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="yielding"></a></p>
+<h3 id="런타임에-제어권-넘기기"><a class="header" href="#런타임에-제어권-넘기기">런타임에 제어권 넘기기</a></h3>
+<p>오래 걸리는 작업을 시뮬레이션해 봅시다. Listing 17-22에서는 <code>slow</code> 함수를 소개합니다.</p>
+<Listing number="17-22" caption="느린 연산을 시뮬레이션하기 위해 `thread::sleep` 사용하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::{thread, time::Duration};
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span><span class="boring">        // We will call `slow` here later
+</span><span class="boring">    });
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn slow(name: &amp;str, ms: u64) {
+    thread::sleep(Duration::from_millis(ms));
+    println!("'{name}' ran for {ms}ms");
+}</code></pre></pre>
+</Listing>
+<p>이 코드는 <code>trpl::sleep</code> 대신 <code>std::thread::sleep</code>을 사용하므로, <code>slow</code>를 호출하면 현재 스레드가 지정한 밀리초(ms) 동안 블록됩니다. 우리는 <code>slow</code>를 실제로 오래 걸리고 블로킹되는 연산을 대신하는 용도로 사용할 수 있습니다.</p>
+<p>Listing 17-23에서는 두 개의 future에서 이러한 CPU 바운드 작업을 에뮬레이션하기 위해 <code>slow</code>를 사용합니다.</p>
+<Listing number="17-23" caption="느린 연산을 시뮬레이션하기 위해 `thread::sleep` 사용하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::{thread, time::Duration};
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let a = async {
+            println!("'a' started.");
+            slow("a", 30);
+            slow("a", 10);
+            slow("a", 20);
+            trpl::sleep(Duration::from_millis(50)).await;
+            println!("'a' finished.");
+        };
+
+        let b = async {
+            println!("'b' started.");
+            slow("b", 75);
+            slow("b", 10);
+            slow("b", 15);
+            slow("b", 350);
+            trpl::sleep(Duration::from_millis(50)).await;
+            println!("'b' finished.");
+        };
+
+        trpl::race(a, b).await;
+<span class="boring">    });
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn slow(name: &amp;str, ms: u64) {
+</span><span class="boring">    thread::sleep(Duration::from_millis(ms));
+</span><span class="boring">    println!("'{name}' ran for {ms}ms");
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p>먼저, 각 future는 여러 번의 느린 연산을 <em>마친 뒤에만</em> 런타임에 제어권을 넘깁니다. 이 코드를 실행하면 다음과 같은 출력이 나타납니다:</p>
+<!-- manual-regeneration
+cd listings/ch17-async-await/listing-17-23/
+cargo run
+copy just the output
+-->
+<pre><code class="language-text">'a' started.
+'a' ran for 30ms
+'a' ran for 10ms
+'a' ran for 20ms
+'b' started.
+'b' ran for 75ms
+'b' ran for 10ms
+'b' ran for 15ms
+'b' ran for 350ms
+'a' finished.
+</code></pre>
+<p>앞서 살펴본 예제와 마찬가지로, <code>race</code>는 여전히 <code>a</code>가 끝나는 즉시 완료됩니다. 하지만 두 future 사이에 작업이 <em>섞여서</em> 실행되지는 않습니다. <code>a</code> future는 <code>trpl::sleep</code> 호출이 await될 때까지 모든 작업을 마친 뒤, 그제서야 <code>b</code> future가 자신의 <code>trpl::sleep</code> 호출이 await될 때까지 모든 작업을 수행하고, 마지막으로 <code>a</code> future가 완료됩니다. 두 future가 느린 작업 사이에 모두 번갈아가며 진행하려면, await 지점이 필요합니다. 그래야 런타임에 제어권을 넘길 수 있습니다. 즉, await할 수 있는 무언가가 필요하다는 뜻입니다!</p>
+<p>이런 제어권 넘김이 Listing 17-23에서 이미 일어나고 있음을 볼 수 있습니다. 만약 <code>a</code> future의 마지막에 있는 <code>trpl::sleep</code>을 제거한다면, <code>a</code>가 완료될 때까지 <code>b</code> future는 <em>전혀</em> 실행되지 않을 것입니다. 이제 Listing 17-24에서처럼, 연산이 번갈아가며 진행될 수 있도록 <code>sleep</code> 함수를 활용해 보겠습니다.</p>
+<Listing number="17-24" caption="작업이 번갈아가며 진행되도록 `sleep` 사용하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::{thread, time::Duration};
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let one_ms = Duration::from_millis(1);
+
+        let a = async {
+            println!("'a' started.");
+            slow("a", 30);
+            trpl::sleep(one_ms).await;
+            slow("a", 10);
+            trpl::sleep(one_ms).await;
+            slow("a", 20);
+            trpl::sleep(one_ms).await;
+            println!("'a' finished.");
+        };
+
+        let b = async {
+            println!("'b' started.");
+            slow("b", 75);
+            trpl::sleep(one_ms).await;
+            slow("b", 10);
+            trpl::sleep(one_ms).await;
+            slow("b", 15);
+            trpl::sleep(one_ms).await;
+            slow("b", 350);
+            trpl::sleep(one_ms).await;
+            println!("'b' finished.");
+        };
+<span class="boring">
+</span><span class="boring">        trpl::race(a, b).await;
+</span><span class="boring">    });
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn slow(name: &amp;str, ms: u64) {
+</span><span class="boring">    thread::sleep(Duration::from_millis(ms));
+</span><span class="boring">    println!("'{name}' ran for {ms}ms");
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p>Listing 17-24에서는 각 <code>slow</code> 호출 사이에 await 지점이 있는 <code>trpl::sleep</code> 호출을 추가했습니다. 이제 두 future의 작업이 번갈아가며(interleaved) 실행됩니다:</p>
+<!-- manual-regeneration
+cd listings/ch17-async-await/listing-17-24
+cargo run
+copy just the output
+-->
+<pre><code class="language-text">'a' started.
+'a' ran for 30ms
+'b' started.
+'b' ran for 75ms
+'a' ran for 10ms
+'b' ran for 10ms
+'a' ran for 20ms
+'b' ran for 15ms
+'a' finished.
+</code></pre>
+<p><code>a</code> future는 여전히 제어권을 <code>b</code>에게 넘기기 전에 잠시 실행을 계속합니다. 왜냐하면 처음에 <code>trpl::sleep</code>을 호출하기 전에 <code>slow</code>를 먼저 호출하기 때문입니다. 하지만 그 이후에는 각 future가 await 지점에 도달할 때마다 서로 번갈아가며 실행됩니다. 이 예제에서는 매번 <code>slow</code>를 호출한 뒤에 작업을 나눴지만, 실제로는 우리가 원하는 방식대로 작업을 쪼갤 수 있습니다.</p>
+<p>여기서 정말로 <em>sleep</em>을 하고 싶은 것은 아닙니다. 가능한 한 빠르게 진행하고 싶을 뿐이고, 단지 런타임에 제어권만 넘기면 됩니다. 이를 위해 <code>yield_now</code> 함수를 직접 사용할 수 있습니다. Listing 17-25에서는 모든 <code>sleep</code> 호출을 <code>yield_now</code>로 교체합니다.</p>
+<Listing number="17-25" caption="`yield_now`를 사용해 작업이 번갈아가며 진행되도록 하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::{thread, time::Duration};
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let a = async {
+            println!("'a' started.");
+            slow("a", 30);
+            trpl::yield_now().await;
+            slow("a", 10);
+            trpl::yield_now().await;
+            slow("a", 20);
+            trpl::yield_now().await;
+            println!("'a' finished.");
+        };
+
+        let b = async {
+            println!("'b' started.");
+            slow("b", 75);
+            trpl::yield_now().await;
+            slow("b", 10);
+            trpl::yield_now().await;
+            slow("b", 15);
+            trpl::yield_now().await;
+            slow("b", 350);
+            trpl::yield_now().await;
+            println!("'b' finished.");
+        };
+<span class="boring">
+</span><span class="boring">        trpl::race(a, b).await;
+</span><span class="boring">    });
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn slow(name: &amp;str, ms: u64) {
+</span><span class="boring">    thread::sleep(Duration::from_millis(ms));
+</span><span class="boring">    println!("'{name}' ran for {ms}ms");
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p>이 코드는 실제 의도를 더 명확하게 보여줄 뿐만 아니라, <code>sleep</code>을 사용하는 것보다 훨씬 더 빠를 수 있습니다. 왜냐하면 <code>sleep</code>에서 사용하는 타이머와 같은 기능들은 보통 얼마나 세밀하게 동작할 수 있는지에 한계가 있기 때문입니다. 예를 들어, 우리가 사용하는 <code>sleep</code>은 1나노초짜리 <code>Duration</code>을 전달해도 항상 최소 1밀리초는 잠들게 됩니다. 다시 말해, 현대 컴퓨터는 <em>정말</em> 빠르기 때문에 1밀리초 동안 엄청나게 많은 일을 할 수 있습니다!</p>
+<p>이 차이를 직접 확인해보고 싶다면, Listing 17-26과 같은 간단한 벤치마크를 만들어 볼 수 있습니다. (이 방법이 아주 엄밀한 성능 테스트는 아니지만, 여기서 차이를 보여주기에는 충분합니다.)</p>
+<Listing number="17-26" caption="`sleep`과 `yield_now`의 성능 비교하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::time::{Duration, Instant};
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let one_ns = Duration::from_nanos(1);
+        let start = Instant::now();
+        async {
+            for _ in 1..1000 {
+                trpl::sleep(one_ns).await;
+            }
+        }
+        .await;
+        let time = Instant::now() - start;
+        println!(
+            "'sleep' version finished after {} seconds.",
+            time.as_secs_f32()
+        );
+
+        let start = Instant::now();
+        async {
+            for _ in 1..1000 {
+                trpl::yield_now().await;
+            }
+        }
+        .await;
+        let time = Instant::now() - start;
+        println!(
+            "'yield' version finished after {} seconds.",
+            time.as_secs_f32()
+        );
+<span class="boring">    });
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p>여기서는 상태 출력은 모두 생략하고, <code>trpl::sleep</code>에 1나노초짜리 <code>Duration</code>을 전달하여 각 future가 서로 전환 없이 독립적으로 실행되도록 합니다. 그런 다음 1,000번 반복해서, <code>trpl::sleep</code>을 사용하는 future와 <code>trpl::yield_now</code>를 사용하는 future가 각각 얼마나 걸리는지 비교해 봅니다.</p>
+<p><code>yield_now</code> 버전이 <em>훨씬</em> 더 빠릅니다!</p>
+<p>이는 프로그램에서 어떤 작업을 하느냐에 따라, async가 계산 집약적인 작업에도 유용할 수 있음을 의미합니다. async는 프로그램의 여러 부분 간 관계를 구조화하는 데 유용한 도구를 제공하기 때문입니다. 이것은 <em>협력적 멀티태스킹</em>의 한 형태로, 각 future가 await 지점을 통해 언제 제어권을 넘길지 스스로 결정할 수 있습니다. 따라서 각 future는 너무 오래 블로킹하지 않도록 책임도 함께 집니다. 일부 Rust 기반 임베디드 운영체제에서는 이것이 <em>유일한</em> 멀티태스킹 방식이기도 합니다!</p>
+<p>실제 코드에서는 물론 모든 줄마다 함수 호출과 await 지점을 번갈아가며 사용하지는 않습니다. 이런 방식으로 제어권을 넘기는 것은 비교적 비용이 적지만, 완전히 무료는 아닙니다. 많은 경우, 계산 집약적인 작업을 너무 잘게 쪼개면 오히려 성능이 크게 저하될 수 있으므로, <em>전체적인</em> 성능을 위해서는 잠깐 블로킹하는 것이 더 나을 때도 있습니다. 항상 실제 코드의 성능 병목이 어디인지 측정해 보세요. 하지만 만약 동시에 실행되길 기대했던 작업이 직렬로 처리되는 현상이 자주 보인다면, 이러한 동작 원리를 꼭 기억해 두세요!</p>
+<h3 id="직접-async-추상화-만들기"><a class="header" href="#직접-async-추상화-만들기">직접 Async 추상화 만들기</a></h3>
+<p>Future들을 조합해서 새로운 패턴을 만들 수도 있습니다. 예를 들어, 이미 가지고 있는 async 빌딩 블록들로 <code>timeout</code> 함수를 만들어볼 수 있습니다. 완성된 결과물 역시 또 다른 빌딩 블록이 되어, 더 많은 async 추상화를 만드는 데 사용할 수 있습니다.</p>
+<p>Listing 17-27은 느린 future와 함께 이 <code>timeout</code>이 어떻게 동작할지 보여줍니다.</p>
+<Listing number="17-27" caption="상상 속의 `timeout`을 사용해 느린 연산을 제한 시간 내에 실행하기" file-name="src/main.rs">
+<pre><code class="language-rust ignore"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let slow = async {
+            trpl::sleep(Duration::from_millis(100)).await;
+            "I finished!"
+        };
+
+        match timeout(slow, Duration::from_millis(10)).await {
+            Ok(message) =&gt; println!("Succeeded with '{message}'"),
+            Err(duration) =&gt; {
+                println!("Failed after {} seconds", duration.as_secs())
+            }
+        }
+<span class="boring">    });
+</span><span class="boring">}</span></code></pre>
+</Listing>
+<p>이제 직접 구현해 봅시다! 먼저, <code>timeout</code>의 API를 어떻게 설계할지 생각해 보겠습니다.</p>
+<ul>
+<li>직접 await할 수 있도록, 이 함수 자체도 async 함수여야 합니다.</li>
+<li>첫 번째 파라미터는 실행할 future가 되어야 합니다. 어떤 future든 동작할 수 있도록 제네릭으로 만들 수 있습니다.</li>
+<li>두 번째 파라미터는 대기할 최대 시간입니다. <code>Duration</code> 타입을 사용하면 <code>trpl::sleep</code>에 그대로 넘기기 쉽습니다.</li>
+<li>반환값은 <code>Result</code>여야 합니다. future가 정상적으로 완료되면, 그 결과 값을 담은 <code>Ok</code>를 반환합니다. 만약 타임아웃이 먼저 발생하면, 대기한 시간을 담은 <code>Err</code>를 반환합니다.</li>
+</ul>
+<p>Listing 17-28에서 이 선언을 보여줍니다.</p>
+<!-- This is not tested because it intentionally does not compile. -->
+<Listing number="17-28" caption="`timeout`의 시그니처 정의하기" file-name="src/main.rs">
+<pre><code class="language-rust ignore"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span><span class="boring">        let slow = async {
+</span><span class="boring">            trpl::sleep(Duration::from_secs(5)).await;
+</span><span class="boring">            "Finally finished"
+</span><span class="boring">        };
+</span><span class="boring">
+</span><span class="boring">        match timeout(slow, Duration::from_millis(10)).await {
+</span><span class="boring">            Ok(message) =&gt; println!("Succeeded with '{message}'"),
+</span><span class="boring">            Err(duration) =&gt; {
+</span><span class="boring">                println!("Failed after {} seconds", duration.as_secs())
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    });
+</span><span class="boring">}
+</span><span class="boring">
+</span>async fn timeout&lt;F: Future&gt;(
+    future_to_try: F,
+    max_time: Duration,
+) -&gt; Result&lt;F::Output, Duration&gt; {
+    // Here is where our implementation will go!
+}</code></pre>
+</Listing>
+<p>이제 타입에 대한 목표는 충족했으니, <em>동작</em>에 대해 생각해 봅시다. 우리가 원하는 것은 전달받은 future와 지정한 시간(duration)을 경주시키는 것입니다. duration으로부터 타이머 future를 만들기 위해 <code>trpl::sleep</code>을 사용할 수 있고, 이 타이머와 호출자가 넘긴 future를 함께 실행하기 위해 <code>trpl::race</code>를 사용할 수 있습니다.</p>
+<p>또한, <code>race</code>는 공정하지 않으며, 인자를 전달된 순서대로 poll한다는 점도 알고 있습니다. 따라서 <code>future_to_try</code>를 먼저 <code>race</code>에 전달해야, <code>max_time</code>이 아주 짧은 경우에도 이 future가 완료될 기회를 얻을 수 있습니다. 만약 <code>future_to_try</code>가 먼저 끝나면, <code>race</code>는 해당 future의 출력값을 담은 <code>Left</code>를 반환합니다. 반대로 타이머가 먼저 끝나면, <code>race</code>는 타이머의 출력값인 <code>()</code>을 담은 <code>Right</code>를 반환합니다.</p>
+<p>Listing 17-29에서는 <code>trpl::race</code>를 await한 결과를 match로 분기합니다.</p>
+<Listing number="17-29" caption="`race`와 `sleep`으로 `timeout` 정의하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::time::Duration;
+</span><span class="boring">
+</span>use trpl::Either;
+
+// --snip--
+
+fn main() {
+    trpl::run(async {
+        let slow = async {
+            trpl::sleep(Duration::from_secs(5)).await;
+            "Finally finished"
+        };
+
+        match timeout(slow, Duration::from_secs(2)).await {
+            Ok(message) =&gt; println!("Succeeded with '{message}'"),
+            Err(duration) =&gt; {
+                println!("Failed after {} seconds", duration.as_secs())
+            }
+        }
+    });
+}
+
+async fn timeout&lt;F: Future&gt;(
+    future_to_try: F,
+    max_time: Duration,
+) -&gt; Result&lt;F::Output, Duration&gt; {
+    match trpl::race(future_to_try, trpl::sleep(max_time)).await {
+        Either::Left(output) =&gt; Ok(output),
+        Either::Right(_) =&gt; Err(max_time),
+    }
+<span class="boring">}</span></code></pre></pre>
+</Listing>
+<p><code>future_to_try</code>가 성공해서 <code>Left(output)</code>을 받으면 <code>Ok(output)</code>을 반환합니다. 반대로 sleep 타이머가 먼저 끝나서 <code>Right(())</code>를 받으면, <code>()</code>는 <code>_</code>로 무시하고 대신 <code>Err(max_time)</code>을 반환합니다.</p>
+<p>이렇게 하면 두 개의 async 헬퍼로 동작하는 <code>timeout</code>을 완성할 수 있습니다. 코드를 실행하면, 타임아웃이 발생했을 때 실패 메시지가 출력됩니다:</p>
+<pre><code class="language-text">Failed after 2 seconds
+</code></pre>
+<p>future는 다른 future와 조합할 수 있기 때문에, 더 작은 async 빌딩 블록들을 이용해 매우 강력한 도구를 만들 수 있습니다. 예를 들어, 이와 같은 접근법을 사용해 타임아웃과 재시도를 결합하고, 이를 네트워크 호출(이 장의 앞부분에서 다룬 예시 중 하나)과 같은 작업에 적용할 수도 있습니다.</p>
+<p>실제로는 대부분 <code>async</code>와 <code>await</code>를 직접 사용하게 되며, 그 다음으로는 <code>join</code>, <code>join_all</code>, <code>race</code> 등과 같은 함수나 매크로를 사용하게 됩니다. 이러한 API와 함께 future를 사용하려면 가끔씩만 <code>pin</code>을 사용할 필요가 있습니다.</p>
+<p>이제 여러 future를 동시에 다루는 다양한 방법을 살펴보았습니다. 다음으로는, 시간에 따라 여러 future를 순차적으로 다루는 <em>스트림(stream)</em> 에 대해 알아보겠습니다. 그 전에 고려해볼 만한 몇 가지 사항이 있습니다:</p>
+<ul>
+<li>
+<p>우리는 <code>join_all</code>과 함께 <code>Vec</code>을 사용해, 어떤 그룹에 속한 모든 future가 완료될 때까지 기다렸습니다. 만약 <code>Vec</code>을 사용해 future 그룹을 <em>순차적으로</em> 처리하려면 어떻게 해야 할까요? 그렇게 했을 때의 트레이드오프는 무엇일까요?</p>
+</li>
+<li>
+<p><code>futures</code> 크레이트의 <code>futures::stream::FuturesUnordered</code> 타입을 살펴보세요. 이것을 <code>Vec</code> 대신 사용하면 어떤 점이 다를까요? (이 타입이 크레이트의 <code>stream</code> 부분에 속해 있다는 점은 신경 쓰지 않아도 됩니다. 어떤 future 컬렉션과도 잘 동작합니다.)</p>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="stream-순차적인-future"><a class="header" href="#stream-순차적인-future">Stream: 순차적인 Future</a></h2>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="streams"></a></p>
+<p>지금까지 이 장에서는 주로 개별 future에 집중했습니다. 한 가지 큰 예외는 우리가 사용했던 async 채널이었습니다. 앞서 이 장의 <a href="https://doc.rust-lang.org/book/ch17-02-concurrency-with-async.html#message-passing">“메시지 전달”</a><!-- ignore --> 섹션에서 async 채널의 수신기를 어떻게 사용했는지 기억해 보세요. async <code>recv</code> 메서드는 시간에 따라 일련의 아이템들을 생성합니다. 이것은 <em>스트림 (stream)</em> 이라고 하는 훨씬 더 일반적인 패턴의 한 예입니다.</p>
+<p>우리는 13장에서 <a href="https://doc.rust-lang.org/book/ch13-02-iterators.html#the-iterator-trait-and-the-next-method">이터레이터 트레이트와 <code>next</code> 메서드</a><!-- ignore --> 섹션을 살펴보면서 아이템의 시퀀스를 본 적이 있습니다. 하지만 이터레이터와 async 채널 수신기에는 두 가지 차이점이 있습니다. 첫 번째는 시간입니다. 이터레이터는 동기적으로 동작하지만, 채널 수신기는 비동기적으로 동작합니다. 두 번째는 API입니다. <code>Iterator</code>를 직접 사용할 때는 동기적인 <code>next</code> 메서드를 호출합니다. 반면, 특히 <code>trpl::Receiver</code> 스트림에서는 비동기적인 <code>recv</code> 메서드를 호출했습니다. 그 외에는 이 API들이 매우 비슷하게 느껴지는데, 이것은 우연이 아닙니다. 스트림은 비동기적인 형태의 반복(iteration)과 같습니다. <code>trpl::Receiver</code>가 메시지를 받기 위해 특별히 대기하는 반면, 범용 스트림 API는 훨씬 더 넓은 개념입니다: 이터레이터처럼 다음 아이템을 제공하지만, 비동기적으로 동작합니다.</p>
+<p>이터레이터와 스트림의 유사성 덕분에, 러스트에서는 실제로 어떤 이터레이터든 스트림으로 만들 수 있습니다. 이터레이터와 마찬가지로, 스트림에서도 <code>next</code> 메서드를 호출한 뒤 그 결과를 await 하여 사용할 수 있습니다. Listing 17-30에서처럼 말이죠.</p>
+<Listing number="17-30" caption="이터레이터로부터 스트림을 만들고 그 값을 출력하기" file-name="src/main.rs">
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        let iter = values.iter().map(|n| n * 2);
+        let mut stream = trpl::stream_from_iter(iter);
+
+        while let Some(value) = stream.next().await {
+            println!("The value was: {value}");
+        }
+<span class="boring">    });
+</span><span class="boring">}</span></code></pre>
+</Listing>
+<p>우리는 숫자 배열로 시작해서, 이를 이터레이터로 변환한 뒤 <code>map</code>을 호출하여 모든 값을 두 배로 만듭니다. 그런 다음 이터레이터를 <code>trpl::stream_from_iter</code> 함수를 사용해 스트림으로 변환합니다. 이후, 스트림에 아이템이 도착할 때마다 <code>while let</code> 루프로 반복합니다.</p>
+<p>하지만 코드를 실행해보면, 컴파일이 되지 않고 <code>next</code> 메서드를 사용할 수 없다는 에러가 발생합니다:</p>
+<!-- manual-regeneration
+cd listings/ch17-async-await/listing-17-30
+cargo build
+copy only the error output
+-->
+<pre><code class="language-console">error[E0599]: no method named `next` found for struct `Iter` in the current scope
+  --&gt; src/main.rs:10:40
+   |
+10 |         while let Some(value) = stream.next().await {
+   |                                        ^^^^
+   |
+   = note: the full type name has been written to 'file:///projects/async-await/target/debug/deps/async_await-575db3dd3197d257.long-type-14490787947592691573.txt'
+   = note: consider using `--verbose` to print the full type name to the console
+   = help: items from traits can only be used if the trait is in scope
+help: the following traits which provide `next` are implemented but not in scope; perhaps you want to import one of them
+   |
+1  + use crate::trpl::StreamExt;
+   |
+1  + use futures_util::stream::stream::StreamExt;
+   |
+1  + use std::iter::Iterator;
+   |
+1  + use std::str::pattern::Searcher;
+   |
+help: there is a method `try_next` with a similar name
+   |
+10 |         while let Some(value) = stream.try_next().await {
+   |                                        ~~~~~~~~
+</code></pre>
+<p>이 출력에서 설명하듯이, 컴파일러 에러의 원인은 <code>next</code> 메서드를 사용하려면 올바른 트레이트가 스코프에 있어야 한다는 점입니다. 지금까지의 논의를 바탕으로, 여러분은 아마도 그 트레이트가 <code>Stream</code>일 것이라고 예상할 수 있지만, 실제로는 <code>StreamExt</code>입니다. <em>확장(extension)</em> 을 의미하는 <code>Ext</code>는 러스트 커뮤니티에서 한 트레이트를 다른 트레이트로 확장할 때 자주 사용하는 패턴입니다.</p>
+<p><code>Stream</code>과 <code>StreamExt</code> 트레이트에 대해서는 이 장의 끝에서 좀 더 자세히 설명하겠지만, 지금은 <code>Stream</code> 트레이트가 사실상 <code>Iterator</code>와 <code>Future</code> 트레이트를 결합한 저수준 인터페이스를 정의한다는 점만 알면 충분합니다. <code>StreamExt</code>는 <code>Stream</code> 위에 더 높은 수준의 API 집합을 제공하는데, 여기에는 <code>next</code> 메서드와 <code>Iterator</code> 트레이트가 제공하는 것과 유사한 여러 유틸리티 메서드가 포함되어 있습니다. <code>Stream</code>과 <code>StreamExt</code>는 아직 러스트 표준 라이브러리의 일부는 아니지만, 대부분의 생태계 크레이트에서는 동일한 정의를 사용합니다.</p>
+<p>컴파일러 에러를 해결하려면 Listing 17-31과 같이 <code>trpl::StreamExt</code>를 <code>use</code>로 가져오면 됩니다.</p>
+<Listing number="17-31" caption="이터레이터를 스트림의 기반으로 성공적으로 사용하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span>use trpl::StreamExt;
+
+fn main() {
+    trpl::run(async {
+        let values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        let iter = values.iter().map(|n| n * 2);
+        let mut stream = trpl::stream_from_iter(iter);
+
+        while let Some(value) = stream.next().await {
+            println!("The value was: {value}");
+        }
+    });
+}</code></pre></pre>
+</Listing>
+<p>이 모든 요소들을 조합하면, 이제 코드는 우리가 원하는 대로 동작합니다! 게다가 이제 <code>StreamExt</code>가 스코프에 있으므로, 이터레이터에서처럼 다양한 유틸리티 메서드들을 모두 사용할 수 있습니다. 예를 들어, Listing 17-32에서는 <code>filter</code> 메서드를 사용해 3과 5의 배수만 남기고 나머지를 걸러냅니다.</p>
+<Listing number="17-32" caption="Filtering a stream with the `StreamExt::filter` method" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span>use trpl::StreamExt;
+
+fn main() {
+    trpl::run(async {
+        let values = 1..101;
+        let iter = values.map(|n| n * 2);
+        let stream = trpl::stream_from_iter(iter);
+
+        let mut filtered =
+            stream.filter(|value| value % 3 == 0 || value % 5 == 0);
+
+        while let Some(value) = filtered.next().await {
+            println!("The value was: {value}");
+        }
+    });
+}</code></pre></pre>
+</Listing>
+<p>사실, 지금까지의 예시는 평범한 이터레이터만 사용해도, 비동기 없이 충분히 구현할 수 있기 때문에 그다지 흥미롭지 않습니다. 이제 스트림에서만 할 수 있는 <em>고유한</em> 작업에는 무엇이 있는지 살펴보겠습니다.</p>
+<h3 id="스트림-구성하기"><a class="header" href="#스트림-구성하기">스트림 구성하기</a></h3>
+<p>많은 개념들은 스트림으로 자연스럽게 표현할 수 있습니다. 예를 들어, 큐에 아이템이 순차적으로 들어오는 경우, 전체 데이터를 한 번에 메모리에 올릴 수 없을 때 파일 시스템에서 데이터를 청크 단위로 점진적으로 읽어오는 경우, 또는 네트워크를 통해 데이터가 시간에 따라 도착하는 경우 등이 있습니다. 스트림은 future이기 때문에, 다른 종류의 future와 함께 사용하거나 흥미로운 방식으로 조합할 수 있습니다. 예를 들어, 이벤트를 묶어서 너무 많은 네트워크 호출이 발생하지 않도록 하거나, 오래 걸리는 작업 시퀀스에 타임아웃을 설정하거나, 사용자 인터페이스 이벤트를 <em>throttle</em> 해서 불필요한 작업을 줄일 수 있습니다.</p>
+<p>먼저, Listing 17-33에서처럼 WebSocket이나 다른 실시간 통신 프로토콜에서 볼 수 있는 데이터 스트림을 대신할 작은 메시지 스트림을 만들어보겠습니다.</p>
+<Listing number="17-33" caption="`rx` 수신기를 `ReceiverStream`으로 사용하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span>use trpl::{ReceiverStream, Stream, StreamExt};
+
+fn main() {
+    trpl::run(async {
+        let mut messages = get_messages();
+
+        while let Some(message) = messages.next().await {
+            println!("{message}");
+        }
+    });
+}
+
+fn get_messages() -&gt; impl Stream&lt;Item = String&gt; {
+    let (tx, rx) = trpl::channel();
+
+    let messages = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+    for message in messages {
+        tx.send(format!("Message: '{message}'")).unwrap();
+    }
+
+    ReceiverStream::new(rx)
+}</code></pre></pre>
+</Listing>
+<p>먼저, <code>get_messages</code>라는 함수를 만들어 <code>impl Stream&lt;Item = String&gt;</code>을 반환하도록 합니다. 이 함수의 구현에서는 async 채널을 생성하고, 영어 알파벳의 처음 10글자를 반복하면서 채널을 통해 전송합니다.</p>
+<p>또한 새로운 타입인 <code>ReceiverStream</code>을 사용하는데, 이는 <code>trpl::channel</code>의 <code>rx</code> 수신기를 <code>next</code> 메서드를 가진 <code>Stream</code>으로 변환해줍니다. 다시 <code>main</code> 함수로 돌아와서, <code>while let</code> 루프를 사용해 스트림에서 모든 메시지를 출력합니다.</p>
+<p>이 코드를 실행하면, 예상한 결과가 정확히 출력됩니다:</p>
+<!-- Not extracting output because changes to this output aren't significant;
+the changes are likely to be due to the threads running differently rather than
+changes in the compiler -->
+<pre><code class="language-text">Message: 'a'
+Message: 'b'
+Message: 'c'
+Message: 'd'
+Message: 'e'
+Message: 'f'
+Message: 'g'
+Message: 'h'
+Message: 'i'
+Message: 'j'
+</code></pre>
+<p>사실, 이 작업은 일반적인 <code>Receiver</code> API나 <code>Iterator</code> API만으로도 충분히 할 수 있습니다. 하지만 이제 스트림에서만 가능한 기능을 추가해보겠습니다. 바로 스트림의 각 아이템마다 타임아웃을 적용하고, 우리가 내보내는 아이템에 딜레이를 추가하는 것입니다. Listing 17-34에서 그 예시를 볼 수 있습니다.</p>
+<Listing number="17-34" caption="스트림의 각 아이템에 시간 제한을 두기 위해 `StreamExt::timeout` 메서드 사용하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span>use std::{pin::pin, time::Duration};
+use trpl::{ReceiverStream, Stream, StreamExt};
+
+fn main() {
+    trpl::run(async {
+        let mut messages =
+            pin!(get_messages().timeout(Duration::from_millis(200)));
+
+        while let Some(result) = messages.next().await {
+            match result {
+                Ok(message) =&gt; println!("{message}"),
+                Err(reason) =&gt; eprintln!("Problem: {reason:?}"),
+            }
+        }
+    })
+}
+<span class="boring">
+</span><span class="boring">fn get_messages() -&gt; impl Stream&lt;Item = String&gt; {
+</span><span class="boring">    let (tx, rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">    let messages = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+</span><span class="boring">    for message in messages {
+</span><span class="boring">        tx.send(format!("Message: '{message}'")).unwrap();
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    ReceiverStream::new(rx)
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p>먼저, <code>StreamExt</code> 트레이트에서 제공하는 <code>timeout</code> 메서드를 사용해 스트림에 타임아웃을 추가합니다. 그러면 이제 스트림이 <code>Result</code>를 반환하므로, <code>while let</code> 루프의 본문도 수정해야 합니다. <code>Ok</code>는 메시지가 제때 도착했음을, <code>Err</code>는 타임아웃이 발생했음을 의미합니다. 우리는 이 결과를 <code>match</code>로 분기하여, 메시지를 정상적으로 받았을 때는 출력하고, 타임아웃이 발생했을 때는 안내 메시지를 출력합니다. 마지막으로, <code>timeout</code> 헬퍼가 반환하는 스트림은 폴링하려면 핀이 필요하므로, 타임아웃을 적용한 후에 메시지 스트림을 핀(pin) 처리하는 점에 주의하세요.</p>
+<p>하지만 메시지 사이에 딜레이가 없기 때문에, 이 타임아웃은 프로그램의 동작에 아무런 변화를 주지 않습니다. Listing 17-35에서처럼, 이제 전송하는 메시지에 가변적인 딜레이를 추가해보겠습니다.</p>
+<Listing number="17-35" caption="`get_messages`를 async 함수로 만들지 않고도 async 딜레이와 함께 `tx`로 메시지를 전송하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::{pin::pin, time::Duration};
+</span><span class="boring">
+</span><span class="boring">use trpl::{ReceiverStream, Stream, StreamExt};
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span><span class="boring">        let mut messages =
+</span><span class="boring">            pin!(get_messages().timeout(Duration::from_millis(200)));
+</span><span class="boring">
+</span><span class="boring">        while let Some(result) = messages.next().await {
+</span><span class="boring">            match result {
+</span><span class="boring">                Ok(message) =&gt; println!("{message}"),
+</span><span class="boring">                Err(reason) =&gt; eprintln!("Problem: {reason:?}"),
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    })
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn get_messages() -&gt; impl Stream&lt;Item = String&gt; {
+    let (tx, rx) = trpl::channel();
+
+    trpl::spawn_task(async move {
+        let messages = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+        for (index, message) in messages.into_iter().enumerate() {
+            let time_to_sleep = if index % 2 == 0 { 100 } else { 300 };
+            trpl::sleep(Duration::from_millis(time_to_sleep)).await;
+
+            tx.send(format!("Message: '{message}'")).unwrap();
+        }
+    });
+
+    ReceiverStream::new(rx)
+}</code></pre></pre>
+</Listing>
+<p><code>get_messages</code> 함수에서는 <code>messages</code> 배열에 <code>enumerate</code> 이터레이터 메서드를 사용하여 각 아이템을 전송할 때 그 인덱스와 아이템 자체를 함께 얻습니다. 그리고 실제 환경에서 메시지 스트림에서 볼 수 있는 다양한 지연을 시뮬레이션하기 위해, 인덱스가 짝수인 아이템에는 100밀리초, 홀수인 아이템에는 300밀리초의 딜레이를 적용합니다. 타임아웃이 200밀리초로 설정되어 있으므로, 이로 인해 전체 메시지의 절반에 영향을 주게 됩니다.</p>
+<p><code>get_messages</code> 함수에서 메시지 사이에 블로킹 없이 잠시 멈추려면 async를 사용해야 합니다. 하지만 <code>get_messages</code> 자체를 async 함수로 만들 수는 없습니다. 그렇게 하면 반환 타입이 <code>Stream&lt;Item = String&gt;</code>이 아니라 <code>Future&lt;Output = Stream&lt;Item = String&gt;&gt;</code>이 되기 때문입니다. 호출자는 스트림에 접근하기 위해 <code>get_messages</code> 자체를 await 해야 합니다. 하지만 기억하세요: 하나의 future 내에서는 모든 일이 순차적으로 일어나고, 동시성은 future <em>사이</em> 에서 발생합니다. <code>get_messages</code>를 await 하면, 모든 메시지 전송(각 메시지 사이의 sleep 딜레이 포함)이 스트림을 반환하기 전에 한 번에 처리됩니다. 그 결과, 타임아웃이 무의미해집니다. 스트림 자체에는 지연이 없고, 모든 지연이 스트림이 생성되기 전에 발생하게 됩니다.</p>
+<p>따라서, <code>get_messages</code>는 스트림을 반환하는 일반 함수로 두고, async <code>sleep</code> 호출을 처리할 별도의 태스크를 생성해서 실행합니다.</p>
+<blockquote>
+<p>참고: 이렇게 <code>spawn_task</code>를 호출할 수 있는 것은 이미 런타임을 설정해두었기 때문입니다. 만약 그렇지 않았다면 패닉이 발생했을 것입니다. 다른 구현체들은 각기 다른 트레이드오프를 선택합니다. 어떤 것은 새로운 런타임을 생성해 패닉을 피하지만 약간의 오버헤드가 생길 수 있고, 어떤 것은 런타임에 대한 참조 없이 태스크를 독립적으로 스폰하는 방법 자체를 제공하지 않을 수도 있습니다. 사용하는 런타임이 어떤 트레이드오프를 선택했는지 반드시 확인하고, 그에 맞게 코드를 작성하세요!</p>
+</blockquote>
+<p>이제 우리의 코드는 훨씬 더 흥미로운 결과를 보여줍니다. 메시지 쌍마다 <code>Problem: Elapsed(())</code> 에러가 나타납니다.</p>
+<!-- Not extracting output because changes to this output aren't significant;
+the changes are likely to be due to the threads running differently rather than
+changes in the compiler -->
+<pre><code class="language-text">Message: 'a'
+Problem: Elapsed(())
+Message: 'b'
+Message: 'c'
+Problem: Elapsed(())
+Message: 'd'
+Message: 'e'
+Problem: Elapsed(())
+Message: 'f'
+Message: 'g'
+Problem: Elapsed(())
+Message: 'h'
+Message: 'i'
+Problem: Elapsed(())
+Message: 'j'
+</code></pre>
+<p>타임아웃이 있다고 해서 메시지가 결국 도착하지 않는 것은 아닙니다. 우리의 채널이 <em>무제한(unbounded)</em> 이기 때문에, 결국 모든 원래 메시지를 다 받게 됩니다. 즉, 메모리에 담을 수 있는 한 많은 메시지를 저장할 수 있습니다. 만약 메시지가 타임아웃 전에 도착하지 않더라도, 스트림 핸들러가 그 상황을 처리하고, 스트림을 다시 폴링할 때 메시지가 도착해 있을 수 있습니다.</p>
+<p>필요하다면 다른 종류의 채널이나, 더 일반적으로는 다른 종류의 스트림을 사용해서 다른 동작을 얻을 수도 있습니다. 이제 메시지 스트림과 시간 간격 스트림을 결합하는 예시를 살펴보겠습니다.</p>
+<h3 id="스트림-합치기"><a class="header" href="#스트림-합치기">스트림 합치기</a></h3>
+<p>먼저, 또 다른 스트림을 만들어보겠습니다. 이 스트림은 직접 실행하면 1밀리초마다 아이템을 하나씩 내보냅니다. 간단하게, <code>sleep</code> 함수를 사용해 일정 시간 후에 메시지를 전송하고, <code>get_messages</code>에서 사용했던 것처럼 채널로부터 스트림을 만드는 방식을 결합할 수 있습니다. 차이점은 이번에는 경과한 인터벌의 개수를 반환한다는 점입니다. 따라서 반환 타입은 <code>impl Stream&lt;Item = u32&gt;</code>가 되고, 함수 이름은 <code>get_intervals</code>로 할 수 있습니다 (Listing 17-36 참고).</p>
+<Listing number="17-36" caption="1밀리초마다 카운터를 내보내는 스트림 만들기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::{pin::pin, time::Duration};
+</span><span class="boring">
+</span><span class="boring">use trpl::{ReceiverStream, Stream, StreamExt};
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span><span class="boring">        let mut messages =
+</span><span class="boring">            pin!(get_messages().timeout(Duration::from_millis(200)));
+</span><span class="boring">
+</span><span class="boring">        while let Some(result) = messages.next().await {
+</span><span class="boring">            match result {
+</span><span class="boring">                Ok(message) =&gt; println!("{message}"),
+</span><span class="boring">                Err(reason) =&gt; eprintln!("Problem: {reason:?}"),
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    })
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn get_messages() -&gt; impl Stream&lt;Item = String&gt; {
+</span><span class="boring">    let (tx, rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">    trpl::spawn_task(async move {
+</span><span class="boring">        let messages = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+</span><span class="boring">        for (index, message) in messages.into_iter().enumerate() {
+</span><span class="boring">            let time_to_sleep = if index % 2 == 0 { 100 } else { 300 };
+</span><span class="boring">            trpl::sleep(Duration::from_millis(time_to_sleep)).await;
+</span><span class="boring">
+</span><span class="boring">            tx.send(format!("Message: '{message}'")).unwrap();
+</span><span class="boring">        }
+</span><span class="boring">    });
+</span><span class="boring">
+</span><span class="boring">    ReceiverStream::new(rx)
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn get_intervals() -&gt; impl Stream&lt;Item = u32&gt; {
+    let (tx, rx) = trpl::channel();
+
+    trpl::spawn_task(async move {
+        let mut count = 0;
+        loop {
+            trpl::sleep(Duration::from_millis(1)).await;
+            count += 1;
+            tx.send(count).unwrap();
+        }
+    });
+
+    ReceiverStream::new(rx)
+}</code></pre></pre>
+</Listing>
+<p>우선 태스크 내부에서 <code>count</code> 변수를 정의합니다. (태스크 바깥에 정의할 수도 있지만, 변수의 범위를 제한하는 것이 더 명확합니다.) 그런 다음 무한 루프를 만듭니다. 루프의 각 반복마다 1밀리초 동안 비동기로 잠시 멈추고, 카운트를 증가시킨 뒤 채널을 통해 값을 전송합니다. 이 모든 작업은 <code>spawn_task</code>로 생성된 태스크 안에서 이루어지므로, 무한 루프를 포함한 전체 작업이 런타임이 종료될 때 함께 정리됩니다.</p>
+<p>런타임이 완전히 종료될 때까지 끝나지 않는 이러한 종류의 무한 루프는 async 러스트에서 꽤 흔하게 볼 수 있습니다. 많은 프로그램이 무기한 실행되어야 하기 때문입니다. async를 사용하면 각 반복마다 적어도 하나의 await 지점이 있다면, 이 루프가 다른 작업을 막지 않습니다.</p>
+<p>이제 다시 main 함수의 async 블록으로 돌아와서, Listing 17-37에서처럼 <code>messages</code> 스트림과 <code>intervals</code> 스트림을 합치는 시도를 할 수 있습니다.</p>
+<Listing number="17-37" caption="`messages` 스트림과 `intervals` 스트림을 합치려는 시도" file-name="src/main.rs">
+<pre><code class="language-rust ignore does_not_compile"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::{pin::pin, time::Duration};
+</span><span class="boring">
+</span><span class="boring">use trpl::{ReceiverStream, Stream, StreamExt};
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let messages = get_messages().timeout(Duration::from_millis(200));
+        let intervals = get_intervals();
+        let merged = messages.merge(intervals);
+<span class="boring">
+</span><span class="boring">        while let Some(result) = merged.next().await {
+</span><span class="boring">            match result {
+</span><span class="boring">                Ok(message) =&gt; println!("{message}"),
+</span><span class="boring">                Err(reason) =&gt; eprintln!("Problem: {reason:?}"),
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    })
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn get_messages() -&gt; impl Stream&lt;Item = String&gt; {
+</span><span class="boring">    let (tx, rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">    trpl::spawn_task(async move {
+</span><span class="boring">        let messages = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+</span><span class="boring">        for (index, message) in messages.into_iter().enumerate() {
+</span><span class="boring">            let time_to_sleep = if index % 2 == 0 { 100 } else { 300 };
+</span><span class="boring">            trpl::sleep(Duration::from_millis(time_to_sleep)).await;
+</span><span class="boring">
+</span><span class="boring">            tx.send(format!("Message: '{message}'")).unwrap();
+</span><span class="boring">        }
+</span><span class="boring">    });
+</span><span class="boring">
+</span><span class="boring">    ReceiverStream::new(rx)
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn get_intervals() -&gt; impl Stream&lt;Item = u32&gt; {
+</span><span class="boring">    let (tx, rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">    trpl::spawn_task(async move {
+</span><span class="boring">        let mut count = 0;
+</span><span class="boring">        loop {
+</span><span class="boring">            trpl::sleep(Duration::from_millis(1)).await;
+</span><span class="boring">            count += 1;
+</span><span class="boring">            tx.send(count).unwrap();
+</span><span class="boring">        }
+</span><span class="boring">    });
+</span><span class="boring">
+</span><span class="boring">    ReceiverStream::new(rx)
+</span><span class="boring">}</span></code></pre>
+</Listing>
+<p>먼저 <code>get_intervals</code>를 호출합니다. 그런 다음 <code>merge</code> 메서드를 사용해 <code>messages</code> 스트림과 <code>intervals</code> 스트림을 합칩니다. <code>merge</code>는 여러 스트림을 하나로 결합하여, 각 소스 스트림에서 아이템이 준비되는 즉시 순서에 상관없이 아이템을 생성하는 스트림을 만듭니다. 마지막으로, 이제는 <code>messages</code> 대신 결합된 스트림을 반복(loop)합니다.</p>
+<p>이 시점에서는, <code>messages</code>와 <code>intervals</code> 모두 단일 <code>merged</code> 스트림에 결합되므로 핀(pin) 처리나 가변(mut) 처리가 필요하지 않습니다. 하지만 이 <code>merge</code> 호출은 컴파일되지 않습니다! (<code>while let</code> 루프의 <code>next</code> 호출도 마찬가지지만, 이 부분은 나중에 다루겠습니다.) 그 이유는 두 스트림의 타입이 다르기 때문입니다. <code>messages</code> 스트림의 타입은 <code>Timeout&lt;impl Stream&lt;Item = String&gt;&gt;</code>이고, 여기서 <code>Timeout</code>은 <code>timeout</code> 호출에 대해 <code>Stream</code>을 구현하는 타입입니다. 반면, <code>intervals</code> 스트림의 타입은 <code>impl Stream&lt;Item = u32&gt;</code>입니다. 이 두 스트림을 합치려면, 둘 중 하나의 타입을 맞춰야 합니다. 이미 우리가 원하는 기본 포맷이고 타임아웃 에러도 처리해야 하는 <code>messages</code> 쪽은 그대로 두고, <code>intervals</code> 스트림을 변환하는 것이 좋습니다 (Listing 17-38 참고).</p>
+<!-- We cannot directly test this one, because it never stops. -->
+<Listing number="17-38" caption="`intervals` 스트림의 타입을 `messages` 스트림의 타입과 맞추기" file-name="src/main.rs">
+<pre><code class="language-rust ignore"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::{pin::pin, time::Duration};
+</span><span class="boring">
+</span><span class="boring">use trpl::{ReceiverStream, Stream, StreamExt};
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let messages = get_messages().timeout(Duration::from_millis(200));
+        let intervals = get_intervals()
+            .map(|count| format!("Interval: {count}"))
+            .timeout(Duration::from_secs(10));
+        let merged = messages.merge(intervals);
+        let mut stream = pin!(merged);
+<span class="boring">
+</span><span class="boring">        while let Some(result) = stream.next().await {
+</span><span class="boring">            match result {
+</span><span class="boring">                Ok(message) =&gt; println!("{message}"),
+</span><span class="boring">                Err(reason) =&gt; eprintln!("Problem: {reason:?}"),
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    })
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn get_messages() -&gt; impl Stream&lt;Item = String&gt; {
+</span><span class="boring">    let (tx, rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">    trpl::spawn_task(async move {
+</span><span class="boring">        let messages = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+</span><span class="boring">        for (index, message) in messages.into_iter().enumerate() {
+</span><span class="boring">            let time_to_sleep = if index % 2 == 0 { 100 } else { 300 };
+</span><span class="boring">            trpl::sleep(Duration::from_millis(time_to_sleep)).await;
+</span><span class="boring">
+</span><span class="boring">            tx.send(format!("Message: '{message}'")).unwrap();
+</span><span class="boring">        }
+</span><span class="boring">    });
+</span><span class="boring">
+</span><span class="boring">    ReceiverStream::new(rx)
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn get_intervals() -&gt; impl Stream&lt;Item = u32&gt; {
+</span><span class="boring">    let (tx, rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">    trpl::spawn_task(async move {
+</span><span class="boring">        let mut count = 0;
+</span><span class="boring">        loop {
+</span><span class="boring">            trpl::sleep(Duration::from_millis(1)).await;
+</span><span class="boring">            count += 1;
+</span><span class="boring">            tx.send(count).unwrap();
+</span><span class="boring">        }
+</span><span class="boring">    });
+</span><span class="boring">
+</span><span class="boring">    ReceiverStream::new(rx)
+</span><span class="boring">}</span></code></pre>
+</Listing>
+<p>먼저, <code>map</code> 헬퍼 메서드를 사용해 <code>intervals</code>를 문자열로 변환할 수 있습니다. 두 번째로, <code>messages</code>에서 사용하는 <code>Timeout</code> 타입과 맞춰야 합니다. 하지만 <code>intervals</code>에는 실제로 타임아웃이 필요하지 않으므로, 우리가 사용하는 다른 딜레이보다 충분히 긴 타임아웃을 그냥 만들어주면 됩니다. 여기서는 <code>Duration::from_secs(10)</code>을 사용해 10초짜리 타임아웃을 만듭니다. 마지막으로, <code>while let</code> 루프에서 <code>next</code>를 반복 호출할 수 있도록 <code>stream</code>을 가변(mut) 변수로 만들고, 안전하게 사용할 수 있도록 핀(pin) 처리해야 합니다. 이렇게 하면 <em>거의</em> 원하는 결과에 도달합니다. 모든 타입이 맞춰집니다. 하지만 실제로 실행해보면 두 가지 문제가 있습니다. 첫째, 프로그램이 절대 종료되지 않습니다! <span class="keystroke">ctrl-c</span>로 직접 중단해야 합니다. 둘째, 알파벳 메시지들이 모든 인터벌 카운터 메시지 사이에 묻혀버립니다.</p>
+<!-- Not extracting output because changes to this output aren't significant;
+the changes are likely to be due to the tasks running differently rather than
+changes in the compiler -->
+<pre><code class="language-text">--snip--
+Interval: 38
+Interval: 39
+Interval: 40
+Message: 'a'
+Interval: 41
+Interval: 42
+Interval: 43
+--snip--
+</code></pre>
+<p>Listing 17-39는 이 마지막 두 가지 문제를 해결하는 한 가지 방법을 보여줍니다.</p>
+<Listing number="17-39" caption="`throttle`와 `take`를 사용해 합쳐진 스트림을 관리하기" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::{pin::pin, time::Duration};
+</span><span class="boring">
+</span><span class="boring">use trpl::{ReceiverStream, Stream, StreamExt};
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span>        let messages = get_messages().timeout(Duration::from_millis(200));
+        let intervals = get_intervals()
+            .map(|count| format!("Interval: {count}"))
+            .throttle(Duration::from_millis(100))
+            .timeout(Duration::from_secs(10));
+        let merged = messages.merge(intervals).take(20);
+        let mut stream = pin!(merged);
+<span class="boring">
+</span><span class="boring">        while let Some(result) = stream.next().await {
+</span><span class="boring">            match result {
+</span><span class="boring">                Ok(message) =&gt; println!("{message}"),
+</span><span class="boring">                Err(reason) =&gt; eprintln!("Problem: {reason:?}"),
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    })
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn get_messages() -&gt; impl Stream&lt;Item = String&gt; {
+</span><span class="boring">    let (tx, rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">    trpl::spawn_task(async move {
+</span><span class="boring">        let messages = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+</span><span class="boring">        for (index, message) in messages.into_iter().enumerate() {
+</span><span class="boring">            let time_to_sleep = if index % 2 == 0 { 100 } else { 300 };
+</span><span class="boring">            trpl::sleep(Duration::from_millis(time_to_sleep)).await;
+</span><span class="boring">
+</span><span class="boring">            tx.send(format!("Message: '{message}'")).unwrap();
+</span><span class="boring">        }
+</span><span class="boring">    });
+</span><span class="boring">
+</span><span class="boring">    ReceiverStream::new(rx)
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn get_intervals() -&gt; impl Stream&lt;Item = u32&gt; {
+</span><span class="boring">    let (tx, rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">    trpl::spawn_task(async move {
+</span><span class="boring">        let mut count = 0;
+</span><span class="boring">        loop {
+</span><span class="boring">            trpl::sleep(Duration::from_millis(1)).await;
+</span><span class="boring">            count += 1;
+</span><span class="boring">            tx.send(count).unwrap();
+</span><span class="boring">        }
+</span><span class="boring">    });
+</span><span class="boring">
+</span><span class="boring">    ReceiverStream::new(rx)
+</span><span class="boring">}</span></code></pre></pre>
+</Listing>
+<p>먼저, <code>intervals</code> 스트림에 <code>throttle</code> 메서드를 사용하여 <code>messages</code> 스트림이 압도당하지 않도록 합니다. <em>Throttling</em>은 함수가 호출되는 빈도, 즉 여기서는 스트림이 폴링되는 빈도를 제한하는 방법입니다. 메시지가 도착하는 간격과 비슷하게 100밀리초마다 한 번씩이면 충분합니다.</p>
+<p>스트림에서 받아들일 아이템의 개수를 제한하려면, <code>merged</code> 스트림에 <code>take</code> 메서드를 적용합니다. 이는 한쪽 스트림이 아니라 최종 출력 전체를 제한하기 위함입니다.</p>
+<p>이제 프로그램을 실행하면, 스트림에서 20개의 아이템을 가져온 뒤 종료되고, 인터벌 메시지가 메시지 스트림을 압도하지 않습니다. 또한 <code>Interval: 100</code>이나 <code>Interval: 200</code> 같은 값이 아니라, <code>Interval: 1</code>, <code>Interval: 2</code>처럼 순차적으로 출력됩니다. 비록 소스 스트림이 1밀리초마다 이벤트를 생성할 수 있지만, <code>throttle</code> 호출이 원래 스트림을 감싸서 지정한 주기마다만 폴링하도록 만들기 때문입니다. 즉, 무시되는 인터벌 메시지가 쌓이는 것이 아니라, 애초에 그런 메시지가 생성되지 않습니다! 이것이 러스트의 future가 가진 <em>지연(laziness)</em> 특성으로, 우리가 원하는 성능 특성을 직접 선택할 수 있게 해줍니다.</p>
+<!-- Not extracting output because changes to this output aren't significant;
+the changes are likely to be due to the threads running differently rather than
+changes in the compiler -->
+<pre><code class="language-text">Interval: 1
+Message: 'a'
+Interval: 2
+Interval: 3
+Problem: Elapsed(())
+Interval: 4
+Message: 'b'
+Interval: 5
+Message: 'c'
+Interval: 6
+Interval: 7
+Problem: Elapsed(())
+Interval: 8
+Message: 'd'
+Interval: 9
+Message: 'e'
+Interval: 10
+Interval: 11
+Problem: Elapsed(())
+Interval: 12
+</code></pre>
+<p>마지막으로 처리해야 할 것이 하나 남았습니다. 바로 에러입니다! 이 두 채널 기반 스트림 모두에서, <code>send</code> 호출은 반대편에서 채널이 닫힐 때 실패할 수 있습니다. 이는 스트림을 구성하는 future들이 런타임에서 어떻게 실행되는지에 따라 달라집니다. 지금까지는 단순히 <code>unwrap</code>을 호출해서 이 가능성을 무시했지만, 실제 애플리케이션에서는 최소한 더 이상 메시지를 보내지 않도록 루프를 종료하는 등 명시적으로 에러를 처리해야 합니다. Listing 17-40은 간단한 에러 처리 전략을 보여줍니다. 문제가 발생하면 에러를 출력하고, 루프에서 <code>break</code>로 빠져나옵니다.</p>
+<Listing number="17-40" caption="에러를 처리하고 루프를 종료하기">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::{pin::pin, time::Duration};
+</span><span class="boring">
+</span><span class="boring">use trpl::{ReceiverStream, Stream, StreamExt};
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span><span class="boring">        let messages = get_messages().timeout(Duration::from_millis(200));
+</span><span class="boring">        let intervals = get_intervals()
+</span><span class="boring">            .map(|count| format!("Interval #{count}"))
+</span><span class="boring">            .throttle(Duration::from_millis(500))
+</span><span class="boring">            .timeout(Duration::from_secs(10));
+</span><span class="boring">        let merged = messages.merge(intervals).take(20);
+</span><span class="boring">        let mut stream = pin!(merged);
+</span><span class="boring">
+</span><span class="boring">        while let Some(result) = stream.next().await {
+</span><span class="boring">            match result {
+</span><span class="boring">                Ok(item) =&gt; println!("{item}"),
+</span><span class="boring">                Err(reason) =&gt; eprintln!("Problem: {reason:?}"),
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    });
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn get_messages() -&gt; impl Stream&lt;Item = String&gt; {
+    let (tx, rx) = trpl::channel();
+
+    trpl::spawn_task(async move {
+        let messages = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+
+        for (index, message) in messages.into_iter().enumerate() {
+            let time_to_sleep = if index % 2 == 0 { 100 } else { 300 };
+            trpl::sleep(Duration::from_millis(time_to_sleep)).await;
+
+            if let Err(send_error) = tx.send(format!("Message: '{message}'")) {
+                eprintln!("Cannot send message '{message}': {send_error}");
+                break;
+            }
+        }
+    });
+
+    ReceiverStream::new(rx)
+}
+
+fn get_intervals() -&gt; impl Stream&lt;Item = u32&gt; {
+    let (tx, rx) = trpl::channel();
+
+    trpl::spawn_task(async move {
+        let mut count = 0;
+        loop {
+            trpl::sleep(Duration::from_millis(1)).await;
+            count += 1;
+
+            if let Err(send_error) = tx.send(count) {
+                eprintln!("Could not send interval {count}: {send_error}");
+                break;
+            };
+        }
+    });
+
+    ReceiverStream::new(rx)
+}</code></pre></pre>
+</Listing>
+<p>항상 그렇듯이, 메시지 전송 에러를 처리하는 올바른 방법은 상황에 따라 다릅니다. 중요한 것은 반드시 자신만의 전략을 세워두는 것입니다.</p>
+<p>이제 실제 예시를 통해 async를 충분히 살펴보았으니, 잠시 한 걸음 물러나서 러스트에서 async가 동작하는 방식의 핵심인 <code>Future</code>, <code>Stream</code>, 그리고 기타 주요 트레이트들의 세부 사항을 좀 더 깊이 파고들어 보겠습니다.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="async를-위한-트레잇-자세히-보기"><a class="header" href="#async를-위한-트레잇-자세히-보기">Async를 위한 트레잇 자세히 보기</a></h2>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="digging-into-the-traits-for-async"></a></p>
+<p>이번 장 전반에 걸쳐 우리는 <code>Future</code>, <code>Pin</code>, <code>Unpin</code>, <code>Stream</code>, 그리고 <code>StreamExt</code> 트레잇을 다양한 방식으로 사용해왔습니다. 하지만 지금까지는 이들이 어떻게 동작하는지, 서로 어떻게 맞물리는지에 대한 세부 사항까지 깊이 들어가지는 않았습니다. 이는 대부분의 일상적인 Rust 작업에서는 충분합니다. 하지만 때로는 이러한 세부 사항을 좀 더 이해해야 하는 상황이 생기기도 합니다. 이 절에서는 그런 경우에 도움이 될 만큼만 살펴보고, <em>정말</em> 깊은 내용은 다른 문서에 남겨두겠습니다.</p>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="future"></a></p>
+<h3 id="future-트레잇"><a class="header" href="#future-트레잇"><code>Future</code> 트레잇</a></h3>
+<p>이제 <code>Future</code> 트레잇이 어떻게 동작하는지 좀 더 자세히 살펴보겠습니다. Rust에서는 이를 다음과 같이 정의합니다:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::pin::Pin;
+use std::task::{Context, Poll};
+
+pub trait Future {
+    type Output;
+
+    fn poll(self: Pin&lt;&amp;mut Self&gt;, cx: &amp;mut Context&lt;'_&gt;) -&gt; Poll&lt;Self::Output&gt;;
+}
+<span class="boring">}</span></code></pre></pre>
+<p>그 트레잇 정의에는 여러 새로운 타입과 지금까지 본 적 없는 문법이 포함되어 있으니, 정의를 하나씩 살펴보겠습니다.</p>
+<p>먼저, <code>Future</code>의 연관 타입인 <code>Output</code>은 해당 future가 어떤 값으로 완결되는지를 나타냅니다. 이는 <code>Iterator</code> 트레잇의 연관 타입인 <code>Item</code>과 유사합니다. 두 번째로, <code>Future</code>에는 <code>poll</code> 메서드가 있는데, 이 메서드는 <code>self</code> 파라미터로 특별한 <code>Pin</code> 참조와 <code>Context</code> 타입에 대한 가변 참조를 받고, <code>Poll&lt;Self::Output&gt;</code>을 반환합니다. <code>Pin</code>과 <code>Context</code>에 대해서는 곧 더 자세히 다루겠습니다. 지금은 메서드가 반환하는 <code>Poll</code> 타입에 집중해 봅시다:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Poll&lt;T&gt; {
+    Ready(T),
+    Pending,
+}
+<span class="boring">}</span></code></pre></pre>
+<p>이 <code>Poll</code> 타입은 <code>Option</code>과 비슷합니다. 값이 있는 <code>Ready(T)</code> 변형과 값이 없는 <code>Pending</code> 변형이 있습니다. 하지만 <code>Poll</code>은 <code>Option</code>과는 전혀 다른 의미를 가집니다! <code>Pending</code> 변형은 future가 아직 해야 할 작업이 남아 있음을 나타내므로, 호출자는 나중에 다시 확인해야 합니다. <code>Ready</code> 변형은 future의 작업이 끝났고 <code>T</code> 값을 사용할 수 있음을 의미합니다.</p>
+<blockquote>
+<p>참고: 대부분의 future에서는, <code>Ready</code>를 반환한 이후에는 호출자가 <code>poll</code>을 다시 호출해서는 안 됩니다. 많은 future들은 준비 완료(ready) 상태가 된 후에 다시 <code>poll</code>을 호출하면 패닉이 발생합니다. 다시 호출해도 안전한 future의 경우, 해당 내용이 문서에 명시되어 있습니다. 이는 <code>Iterator::next</code>의 동작 방식과 유사합니다.</p>
+</blockquote>
+<p><code>await</code>를 사용하는 코드를 보면, Rust는 내부적으로 해당 코드를 <code>poll</code>을 호출하는 코드로 컴파일합니다. Listing 17-4를 다시 보면, 단일 URL의 페이지 제목을 출력하는 예제가 있었는데, Rust는 이를 대략(정확히는 아니지만) 다음과 같은 코드로 컴파일합니다:</p>
+<pre><code class="language-rust ignore">match page_title(url).poll() {
+    Ready(page_title) =&gt; match page_title {
+        Some(title) =&gt; println!("The title for {url} was {title}"),
+        None =&gt; println!("{url} had no title"),
+    }
+    Pending =&gt; {
+        // But what goes here?
+    }
+}</code></pre>
+<p>future가 아직 <code>Pending</code> 상태라면 어떻게 해야 할까요? future가 준비될 때까지 계속해서 다시 시도할 방법이 필요합니다. 다시 말해, 반복문이 필요합니다:</p>
+<pre><code class="language-rust ignore">let mut page_title_fut = page_title(url);
+loop {
+    match page_title_fut.poll() {
+        Ready(value) =&gt; match page_title {
+            Some(title) =&gt; println!("The title for {url} was {title}"),
+            None =&gt; println!("{url} had no title"),
+        }
+        Pending =&gt; {
+            // continue
+        }
+    }
+}</code></pre>
+<p>만약 Rust가 정말로 위의 코드처럼 컴파일된다면, 모든 <code>await</code>가 블로킹이 되어버릴 것입니다. 이는 우리가 원했던 비동기 동작과는 정반대입니다! 대신 Rust는 루프가 이 future의 작업을 잠시 멈추고, 다른 future의 작업을 처리한 뒤 다시 이 future를 확인할 수 있도록 제어권을 넘길 수 있게 만듭니다. 앞서 살펴본 것처럼, 이러한 역할을 수행하는 것이 바로 async 런타임이며, 이러한 스케줄링과 조정 작업이 런타임의 주요 임무 중 하나입니다.</p>
+<p>이 장의 앞부분에서 <code>rx.recv</code>를 기다리는 과정을 설명했습니다. <code>recv</code> 호출은 future를 반환하고, 이 future를 await하면 내부적으로 poll이 호출됩니다. 런타임은 future가 준비될 때까지, 즉 채널이 닫힐 때 <code>None</code>이 반환되거나 메시지가 도착해 <code>Some(message)</code>가 반환될 때까지 future를 일시 중지시킵니다. 이제 <code>Future</code> 트레잇, 특히 <code>Future::poll</code>에 대해 더 깊이 이해했으니, 이 동작이 어떻게 이루어지는지 알 수 있습니다. 런타임은 future가 <code>Poll::Pending</code>을 반환하면 아직 준비되지 않았음을 인식합니다. 반대로, <code>poll</code>이 <code>Poll::Ready(Some(message))</code> 또는 <code>Poll::Ready(None)</code>을 반환하면 future가 준비되었음을 알고 다음 단계로 진행합니다.</p>
+<p>런타임이 실제로 이 작업을 어떻게 수행하는지는 이 책의 범위를 벗어나지만, 중요한 점은 future의 기본 동작 방식입니다. 즉, 런타임은 자신이 관리하는 각 future를 <em>poll</em> 하며, 아직 준비되지 않은 future는 다시 잠들게 둡니다.</p>
+<!-- Old headings. Do not remove or links may break. -->
+<p><a id="pinning-and-the-pin-and-unpin-traits"></a></p>
+<h3 id="pin과-unpin-트레잇"><a class="header" href="#pin과-unpin-트레잇"><code>Pin</code>과 <code>Unpin</code> 트레잇</a></h3>
+<p>Listing 17-16에서 pinning 개념을 소개할 때, 우리는 꽤 복잡한 에러 메시지를 만났습니다. 다시 한 번 그 관련 부분을 살펴보겠습니다:</p>
+<!-- manual-regeneration
+cd listings/ch17-async-await/listing-17-16
+cargo build
+copy *only* the final `error` block from the errors
+-->
+<pre><code class="language-text">error[E0277]: `{async block@src/main.rs:10:23: 10:33}` cannot be unpinned
+  --&gt; src/main.rs:48:33
+   |
+48 |         trpl::join_all(futures).await;
+   |                                 ^^^^^ the trait `Unpin` is not implemented for `{async block@src/main.rs:10:23: 10:33}`
+   |
+   = note: consider using the `pin!` macro
+           consider using `Box::pin` if you need to access the pinned value outside of the current scope
+   = note: required for `Box&lt;{async block@src/main.rs:10:23: 10:33}&gt;` to implement `Future`
+note: required by a bound in `futures_util::future::join_all::JoinAll`
+  --&gt; file:///home/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-util-0.3.30/src/future/join_all.rs:29:8
+   |
+27 | pub struct JoinAll&lt;F&gt;
+   |            ------- required by a bound in this struct
+28 | where
+29 |     F: Future,
+   |        ^^^^^^ required by this bound in `JoinAll`
+</code></pre>
+<p>이 에러 메시지는 우리가 값을 pin 해야 한다는 것뿐만 아니라, pinning이 왜 필요한지도 알려줍니다. <code>trpl::join_all</code> 함수는 <code>JoinAll</code>이라는 구조체를 반환합니다. 이 구조체는 제네릭 타입 <code>F</code>를 가지며, 이 타입은 <code>Future</code> 트레잇을 구현해야 한다는 제약이 있습니다. future를 <code>await</code>로 직접 기다릴 때는 Rust가 내부적으로 해당 future를 자동으로 pin 처리해줍니다. 그래서 우리가 future를 await할 때마다 매번 <code>pin!</code>을 사용할 필요가 없는 것입니다.</p>
+<p>하지만 여기서는 future를 직접 await하는 것이 아닙니다. 대신 여러 future의 컬렉션을 <code>join_all</code> 함수에 전달해서 새로운 future인 <code>JoinAll</code>을 만듭니다. <code>join_all</code>의 시그니처는 컬렉션의 모든 아이템 타입이 <code>Future</code> 트레잇을 구현해야 한다고 요구합니다. 그리고 <code>Box&lt;T&gt;</code>가 <code>Future</code>를 구현하려면, 그 안에 감싸진 <code>T</code>가 <code>Unpin</code> 트레잇을 구현하는 future여야만 합니다.</p>
+<p>정보가 한꺼번에 많이 나왔죠! 이 내용을 제대로 이해하려면, <em>pinning</em> 과 관련해서 <code>Future</code> 트레잇이 실제로 어떻게 동작하는지 좀 더 깊이 살펴볼 필요가 있습니다.</p>
+<p>다시 한 번 <code>Future</code> 트레잇의 정의를 살펴봅시다:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::pin::Pin;
+use std::task::{Context, Poll};
+
+pub trait Future {
+    type Output;
+
+    // Required method
+    fn poll(self: Pin&lt;&amp;mut Self&gt;, cx: &amp;mut Context&lt;'_&gt;) -&gt; Poll&lt;Self::Output&gt;;
+}
+<span class="boring">}</span></code></pre></pre>
+<p><code>cx</code> 파라미터와 그 타입인 <code>Context</code>는 런타임이 어떻게 실제로 각 future를 언제 확인해야 할지(여전히 lazy하게) 알 수 있게 해주는 핵심입니다. 다시 말하지만, 그 동작의 세부 사항은 이 장의 범위를 벗어나며, 일반적으로는 커스텀 <code>Future</code>를 직접 구현할 때만 신경 쓰면 됩니다. 대신 여기서는 <code>self</code>의 타입에 집중하겠습니다. 이 메서드는 <code>self</code>에 타입 어노테이션이 붙은 것을 처음 보는 예시입니다. <code>self</code>에 대한 타입 어노테이션은 다른 함수 파라미터의 타입 어노테이션과 비슷하게 동작하지만, 두 가지 중요한 차이점이 있습니다:</p>
+<ul>
+<li>
+<p>이 어노테이션은 해당 메서드를 호출할 때 <code>self</code>가 어떤 타입이어야 하는지 Rust에게 알려줍니다.</p>
+</li>
+<li>
+<p>아무 타입이나 올 수 있는 것이 아니라, 메서드가 구현된 타입 자체, 그 타입에 대한 참조나 스마트 포인터, 또는 그 타입에 대한 참조를 감싼 <code>Pin</code>만 허용됩니다.</p>
+</li>
+</ul>
+<p>이 문법에 대해서는 <a href="https://doc.rust-lang.org/book/ch18-00-oop.html">18장</a><!-- ignore -->에서 더 자세히 다룹니다. 지금은 future가 <code>Pending</code>인지 <code>Ready(Output)</code>인지 확인하기 위해 poll을 호출하려면, 해당 타입에 대한 <code>Pin</code>으로 감싼 가변 참조가 필요하다는 것만 알아두면 충분합니다.</p>
+<p><code>Pin</code>은 <code>&amp;</code>, <code>&amp;mut</code>, <code>Box</code>, <code>Rc</code>와 같은 포인터 유사 타입을 감싸는 래퍼입니다. (엄밀히 말하면, <code>Pin</code>은 <code>Deref</code> 또는 <code>DerefMut</code> 트레잇을 구현한 타입과 함께 동작하지만, 이는 사실상 포인터 타입과만 동작하는 것과 같습니다.) <code>Pin</code> 자체는 포인터가 아니며, <code>Rc</code>나 <code>Arc</code>처럼 참조 카운팅과 같은 동작을 제공하지도 않습니다. 오로지 컴파일러가 포인터 사용에 제약을 강제할 수 있도록 도와주는 도구일 뿐입니다.</p>
+<p><code>await</code>가 내부적으로 <code>poll</code> 호출로 구현된다는 점을 떠올리면, 앞서 봤던 에러 메시지가 왜 <code>Unpin</code>과 관련되어 있었는지 조금은 이해할 수 있습니다. 그렇다면 <code>Pin</code>은 <code>Unpin</code>과 정확히 어떤 관계가 있고, 왜 <code>Future</code>에서 <code>poll</code>을 호출하려면 <code>self</code>가 반드시 <code>Pin</code> 타입이어야 할까요?</p>
+<p>이 장 앞부분에서 살펴본 것처럼, 하나의 future 안에 여러 개의 await 지점이 있으면, 컴파일러는 이를 상태 기계(state machine)로 변환합니다. 그리고 이 상태 기계가 Rust의 일반적인 안전성 규칙(빌림, 소유권 등)을 모두 따르도록 만듭니다. 이를 위해 Rust는 각 await 지점 사이(혹은 async 블록의 끝까지) 어떤 데이터가 필요한지 분석합니다. 그리고 소스 코드의 해당 구간에서 사용될 데이터에 맞춰 상태 기계의 각 변형(variant)을 생성합니다. 각 변형은 그 구간에서 필요한 데이터에 접근할 수 있도록, 해당 데이터를 소유하거나, 가변/불변 참조를 얻도록 설계됩니다.</p>
+<p>지금까지는 문제가 없었습니다. 어떤 async 블록에서 소유권이나 참조에 대해 잘못 작성하면, borrow checker가 오류를 알려줍니다. 하지만 해당 블록에 대응하는 future를 이리저리 옮겨야 할 때—예를 들어, <code>join_all</code>에 전달하기 위해 future를 <code>Vec</code>에 넣거나, future를 함수에서 반환하려고 할 때—상황이 더 복잡해집니다.</p>
+<p>future를 옮긴다는 것은, Rust가 우리를 위해 생성한 상태 기계(state machine) 자체를 옮긴다는 의미입니다. 그리고 Rust의 대부분 타입과 달리, async 블록에서 생성된 future는 각 변형(variant)의 필드에 자기 자신을 참조하는 내부 참조를 가질 수 있습니다. 이는 Figure 17-4의 단순화된 그림에서 볼 수 있습니다.</p>
+<figure>
+<img alt="단일 열, 세 개 행으로 이루어진 테이블로, future인 fut1을 나타냅니다. 첫 번째와 두 번째 행에는 데이터 값 0과 1이 들어 있고, 세 번째 행에서는 두 번째 행을 가리키는 화살표가 있어 future 내부의 자기 참조를 표현합니다." src="img/trpl17-04.svg" class="center" />
+<figcaption>Figure 17-4: 자기 자신을 참조하는 데이터 타입.</figcaption>
+</figure>
+<p>하지만 기본적으로 자기 자신에 대한 참조를 가진 객체는 이동하는 것이 안전하지 않습니다. 참조는 항상 자신이 가리키는 실제 메모리 주소를 가리키기 때문입니다(그림 17-5 참고). 만약 데이터 구조체 자체를 이동시키면, 내부 참조들은 이전 위치를 계속 가리키게 됩니다. 그러나 그 메모리 위치는 이제 유효하지 않습니다. 한 가지 문제는, 데이터 구조체를 변경해도 그 값이 업데이트되지 않는다는 점입니다. 더 중요한 문제는, 컴퓨터가 이제 그 메모리 공간을 다른 용도로 자유롭게 재사용할 수 있다는 것입니다! 나중에 완전히 무관한 데이터를 읽게 될 수도 있습니다.</p>
+<figure>
+<img alt="두 개의 테이블이 나란히 배치되어 있으며, 각각 fut1과 fut2라는 두 future를 나타냅니다. 각 테이블은 한 개의 열과 세 개의 행으로 구성되어 있으며, fut1에서 fut2로 future가 이동된 결과를 보여줍니다. 첫 번째 테이블인 fut1은 회색으로 처리되어 있고 각 인덱스에는 물음표가 있어, 알 수 없는 메모리 상태를 나타냅니다. 두 번째 테이블인 fut2는 첫 번째와 두 번째 행에 각각 0과 1이 들어 있고, 세 번째 행에서는 fut1의 두 번째 행을 가리키는 화살표가 있어 future가 이동되기 전의 이전 메모리 위치를 참조하고 있음을 나타냅니다." src="img/trpl17-05.svg" class="center" />
+<figcaption>Figure 17-5: 자기 참조 데이터 타입을 이동시켰을 때 발생하는 안전하지 않은 결과</figcaption>
+</figure>
+<p>이론적으로는, 러스트 컴파일러가 어떤 객체가 이동될 때마다 그 객체를 참조하는 모든 참조를 업데이트할 수도 있습니다. 하지만 참조가 복잡하게 얽혀 있다면, 이런 작업은 성능에 큰 부담을 줄 수 있습니다. 만약 해당 데이터 구조가 <em>메모리에서 이동하지 않도록</em> 보장할 수 있다면, 참조를 전혀 업데이트할 필요가 없을 것입니다. 바로 이것이 러스트의 빌림 검사기가 요구하는 사항입니다. 안전한 코드에서는, 활성 참조가 존재하는 아이템을 이동시키는 것을 방지합니다.</p>
+<p><code>Pin</code>은 이러한 원칙을 바탕으로 우리가 필요한 정확한 보증을 제공합니다. 값을 포인터로 감싼 뒤 <code>Pin</code>으로 <em>핀</em> 하면, 그 값은 더 이상 이동할 수 없습니다. 즉, <code>Pin&lt;Box&lt;SomeType&gt;&gt;</code>이 있다면, 실제로 핀되는 것은 <code>Box</code> 포인터가 아니라 <code>SomeType</code> 값입니다. Figure 17-6은 이 과정을 보여줍니다.</p>
+<figure>
+<img alt="세 개의 박스가 나란히 배치되어 있습니다. 첫 번째는 'Pin', 두 번째는 'b1', 세 번째는 'pinned'로 라벨링되어 있습니다. 'pinned' 안에는 'fut'라는 테이블이 있으며, 단일 열로 구성되어 있습니다. 이 테이블은 데이터 구조의 각 부분을 나타내는 셀들로 이루어진 future를 표현합니다. 첫 번째 셀에는 값 '0'이 들어 있고, 두 번째 셀에서는 화살표가 나와 네 번째이자 마지막 셀(값 '1')을 가리키고 있습니다. 세 번째 셀에는 점선과 생략 부호(...)가 있어 데이터 구조에 다른 부분이 있을 수 있음을 나타냅니다. 전체적으로 'fut' 테이블은 자기 자신을 참조하는 future를 나타냅니다. 'Pin' 박스에서 시작된 화살표는 'b1' 박스를 거쳐 'pinned' 박스 안의 'fut' 테이블에 도달합니다." src="img/trpl17-06.svg" class="center" />
+<figcaption>Figure 17-6: 자기 참조 future 타입을 가리키는 `Box`를 pinning하는 모습.</figcaption>
+</figure>
+<p>사실 <code>Box</code> 포인터 자체는 자유롭게 이동할 수 있습니다. 중요한 것은, 궁극적으로 참조되는 데이터가 제자리에 유지되는지 여부입니다. 포인터가 이동하더라도, <em>그 포인터가 가리키는 데이터가 같은 위치에 있다면</em> (Figure 17-7과 같이) 아무런 문제가 없습니다. 별도의 연습 문제로, 각 타입과 <code>std::pin</code> 모듈의 문서를 참고하여 <code>Box</code>를 감싼 <code>Pin</code>을 사용해 이 과정을 어떻게 구현할 수 있을지 고민해 보세요. 핵심은 자기 참조 타입 자체가 이동할 수 없도록, 즉 핀(pin)되어 있어야 한다는 점입니다.</p>
+<figure>
+<img alt="세 개의 열로 대략 배치된 네 개의 박스가 있습니다. 이전 다이어그램과 동일하지만 두 번째 열에 변화가 있습니다. 이제 두 번째 열에는 'b1'과 'b2'라는 두 개의 박스가 있고, 'b1'은 회색으로 처리되어 있습니다. 'Pin'에서 시작된 화살표가 'b1'이 아니라 'b2'를 거쳐 'pinned'로 향하는데, 이는 포인터가 'b1'에서 'b2'로 이동했지만 'pinned' 안의 데이터는 이동하지 않았음을 나타냅니다." src="img/trpl17-07.svg" class="center" />
+<figcaption>Figure 17-7: 자기 참조 future 타입을 가리키는 `Box`를 이동시킨 모습.</figcaption>
+</figure>
+<p>하지만 대부분의 타입은 내부적으로 참조를 가지고 있지 않기 때문에, <code>Pin</code> 래퍼로 감싸져 있더라도 자유롭게 이동해도 전혀 문제가 없습니다. pinning에 대해 신경 써야 하는 경우는 내부 참조를 가진 아이템에 한정됩니다. 숫자나 불리언과 같은 원시 값들은 내부 참조가 없으므로 안전합니다. 일반적으로 Rust에서 사용하는 대부분의 타입도 마찬가지입니다. 예를 들어, <code>Vec</code> 타입은 별다른 걱정 없이 자유롭게 이동할 수 있습니다. 지금까지 살펴본 내용만 놓고 보면, 만약 <code>Pin&lt;Vec&lt;String&gt;&gt;</code>이 있다면, 내부적으로 참조가 없더라도 <code>Pin</code>이 제공하는 안전하지만 제한적인 API만 사용해야 할 것처럼 보입니다. 하지만 실제로는, 내부 참조가 없는 타입은 자유롭게 이동해도 괜찮다는 사실을 컴파일러에게 알려줄 방법이 필요합니다. 바로 여기서 <code>Unpin</code>이 등장합니다.</p>
+<p><code>Unpin</code>은 16장에서 살펴본 <code>Send</code>와 <code>Sync</code>처럼 자체 기능이 없는 마커 트레잇입니다. 마커 트레잇은 특정 트레잇을 구현한 타입이 어떤 상황에서 안전하게 사용될 수 있음을 컴파일러에게 알려주기 위해 존재합니다. <code>Unpin</code>은 해당 타입이 이동과 관련된 어떤 제약도 필요하지 않다는 사실을 컴파일러에게 알려줍니다.</p>
+<!--
+  The inline `<code>` in the next block is to allow the inline `<em>` inside it,
+  matching what NoStarch does style-wise, and emphasizing within the text here
+  that it is something distinct from a normal type.
+-->
+<p><code>Send</code>와 <code>Sync</code>와 마찬가지로, 컴파일러는 안전하다고 판단할 수 있는 모든 타입에 대해 <code>Unpin</code>을 자동으로 구현합니다. 특별한 경우로, 역시 <code>Send</code>와 <code>Sync</code>와 비슷하게, 어떤 타입에 대해 <code>Unpin</code>이 <em>구현되지 않은</em> 경우가 있습니다. 이때의 표기법은 <code>impl !Unpin for <em>SomeType</em></code>과 같이 쓰며, 여기서 <code><em>SomeType</em></code>은 해당 타입에 대한 포인터가 <code>Pin</code>에서 사용될 때 반드시 그 보증을 지켜야만 안전한 타입임을 의미합니다.</p>
+<p>즉, <code>Pin</code>과 <code>Unpin</code>의 관계에서 기억해야 할 점은 두 가지입니다. 첫째, <code>Unpin</code>이 "일반적인" 경우이고, <code>!Unpin</code>이 특별한 경우라는 점입니다. 둘째, 어떤 타입이 <code>Unpin</code>을 구현하는지(<code>!Unpin</code>인지)는 오직 <code>Pin&lt;&amp;mut <em>SomeType</em>&gt;</code>과 같이 해당 타입에 대한 핀된 포인터를 사용할 때만 중요하다는 점입니다.</p>
+<p>좀 더 구체적으로 살펴보면, 예를 들어 <code>String</code>을 생각해봅시다. <code>String</code>은 길이와 그 내용을 이루는 유니코드 문자 데이터를 가지고 있습니다. Figure 17-8에서처럼, 우리는 <code>String</code>을 <code>Pin</code>으로 감쌀 수 있습니다. 하지만 <code>String</code>은 Rust의 대부분 타입과 마찬가지로 자동으로 <code>Unpin</code>을 구현합니다.</p>
+<figure>
+<img alt="동시 작업 흐름" src="img/trpl17-08.svg" class="center" />
+<figcaption>Figure 17-8: `String`을 pinning한 모습. 점선은 `String`이 `Unpin` 트레잇을 구현하므로 실제로는 pinning되지 않음을 나타냅니다.</figcaption>
+</figure>
+<p>따라서 <code>String</code>이 <code>!Unpin</code>을 구현했다면 불법이었을 작업, 즉 Figure 17-9처럼 메모리의 정확히 같은 위치에서 한 문자열을 다른 문자열로 교체하는 것도 문제없이 할 수 있습니다. 이는 <code>String</code>이 내부적으로 참조를 가지고 있지 않아 이동해도 안전하기 때문에, <code>Pin</code>의 계약을 위반하지 않습니다! 바로 그렇기 때문에 <code>String</code>은 <code>!Unpin</code>이 아니라 <code>Unpin</code>을 구현하는 것입니다.</p>
+<figure>
+<img alt="동시 작업 흐름" src="img/trpl17-09.svg" class="center" />
+<figcaption>Figure 17-9: 메모리에서 `String`을 완전히 다른 `String`으로 교체하는 모습.</figcaption>
+</figure>
+<p>이제 Listing 17-17에서 <code>join_all</code> 호출 시 보고된 에러를 이해할 수 있을 만큼 충분히 배웠습니다. 처음에는 async 블록에서 생성된 future들을 <code>Vec&lt;Box&lt;dyn Future&lt;Output = ()&gt;&gt;&gt;</code>로 옮기려고 했지만, 앞서 살펴본 것처럼 이러한 future들은 내부적으로 자기 참조를 가질 수 있으므로 <code>Unpin</code>을 구현하지 않습니다. 이 future들은 pinning이 필요하며, pinning을 거친 후에는 <code>Pin</code> 타입을 <code>Vec</code>에 담아도 future 내부의 데이터가 <em>이동되지 않음</em> 을 확신할 수 있습니다.</p>
+<p><code>Pin</code>과 <code>Unpin</code>은 주로 저수준 라이브러리를 만들거나, 런타임 자체를 구현할 때 중요합니다. 일상적인 Rust 코드에서는 자주 신경 쓸 일이 없지만, 에러 메시지에서 이 트레잇들을 보게 된다면 이제 어떻게 코드를 고쳐야 할지 더 잘 알 수 있을 것입니다!</p>
+<blockquote>
+<p>참고: <code>Pin</code>과 <code>Unpin</code>의 조합 덕분에, Rust에서는 자기 참조를 가지는 복잡한 타입들도 안전하게 구현할 수 있습니다. <code>Pin</code>이 필요한 타입은 오늘날 async Rust에서 가장 흔히 등장하지만, 가끔 다른 맥락에서도 볼 수 있습니다.</p>
+<p><code>Pin</code>과 <code>Unpin</code>이 실제로 어떻게 동작하는지, 그리고 이들이 지켜야 하는 규칙에 대해서는 <code>std::pin</code>의 API 문서에 매우 자세히 설명되어 있으니, 더 깊이 배우고 싶다면 꼭 참고해 보세요.</p>
+<p>내부적으로 어떻게 동작하는지 더 자세히 알고 싶다면, <a href="https://rust-lang.github.io/async-book/"><em>Asynchronous Programming in Rust</em></a>의 <a href="https://rust-lang.github.io/async-book/02_execution/01_chapter.html">2장</a>과 <a href="https://rust-lang.github.io/async-book/04_pinning/01_chapter.html">4장</a>을 참고하세요.</p>
+</blockquote>
+<h3 id="stream-트레잇"><a class="header" href="#stream-트레잇"><code>Stream</code> 트레잇</a></h3>
+<p>이제 <code>Future</code>, <code>Pin</code>, <code>Unpin</code> 트레잇에 대해 더 깊이 이해했으니, 이제는 <code>Stream</code> 트레잇에 대해 살펴볼 차례입니다. 이 장의 앞부분에서 배운 것처럼, 스트림은 비동기 반복자와 유사합니다. 하지만 <code>Iterator</code>나 <code>Future</code>와 달리, 이 글을 쓰는 시점 기준으로 표준 라이브러리에는 <code>Stream</code>의 정의가 없습니다. 대신, 생태계 전반에서 널리 사용되는 <code>futures</code> 크레이트의 매우 일반적인 정의가 존재합니다.</p>
+<p>먼저, <code>Stream</code> 트레잇이 어떻게 두 트레잇의 개념을 결합하는지 보기 전에, <code>Iterator</code>와 <code>Future</code> 트레잇의 정의를 다시 살펴봅시다. <code>Iterator</code>에서는 시퀀스라는 개념이 있습니다. <code>next</code> 메서드는 <code>Option&lt;Self::Item&gt;</code>을 제공합니다. <code>Future</code>에서는 시간에 따라 준비되는 값이라는 개념이 있습니다. <code>poll</code> 메서드는 <code>Poll&lt;Self::Output&gt;</code>을 반환합니다. 시간이 지나면서 준비되는 여러 아이템의 시퀀스를 표현하기 위해, 이 두 가지 특징을 결합한 <code>Stream</code> 트레잇을 정의할 수 있습니다:</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::pin::Pin;
+use std::task::{Context, Poll};
+
+trait Stream {
+    type Item;
+
+    fn poll_next(
+        self: Pin&lt;&amp;mut Self&gt;,
+        cx: &amp;mut Context&lt;'_&gt;
+    ) -&gt; Poll&lt;Option&lt;Self::Item&gt;&gt;;
+}
+<span class="boring">}</span></code></pre></pre>
+<p><code>Stream</code> 트레잇은 스트림이 생성하는 아이템의 타입을 나타내는 연관 타입 <code>Item</code>을 정의합니다. 이는 <code>Iterator</code>와 유사하게, 0개 이상의 아이템이 있을 수 있다는 점에서 비슷하며, 항상 하나의 <code>Output</code>만 가지는 <code>Future</code>와는 다릅니다(그 값이 단위 타입 <code>()</code>일지라도).</p>
+<p>또한 <code>Stream</code>은 이러한 아이템을 얻기 위한 메서드를 정의합니다. 이 메서드는 <code>poll_next</code>라고 부르는데, 이는 <code>Future::poll</code>처럼 폴링(polling) 방식으로 동작하며, <code>Iterator::next</code>처럼 아이템의 시퀀스를 생성한다는 점을 명확히 하기 위함입니다. 반환 타입은 <code>Poll</code>과 <code>Option</code>을 결합한 형태입니다. 바깥쪽 타입은 <code>Poll</code>로, future처럼 준비 여부를 확인해야 하기 때문입니다. 안쪽 타입은 <code>Option</code>으로, 반복자처럼 더 많은 메시지가 있는지 신호를 주기 위함입니다.</p>
+<p>이와 매우 유사한 정의가 앞으로 Rust 표준 라이브러리의 일부가 될 가능성이 높습니다. 그 전까지는 대부분의 런타임에서 이 트레잇을 제공하므로, 이를 신뢰하고 사용할 수 있습니다. 이후에 다루는 내용도 일반적으로 모두 적용됩니다!</p>
+<p>스트리밍 섹션에서 살펴본 예제에서는 사실 <code>poll_next</code>나 <code>Stream</code>을 직접 사용하지 않고, 대신 <code>next</code>와 <code>StreamExt</code>를 사용했습니다. 물론 직접 <code>poll_next</code> API를 사용해 직접 <code>Stream</code> 상태 기계를 작성할 수도 있고, 마찬가지로 future의 <code>poll</code> 메서드를 직접 사용할 수도 있습니다. 하지만 <code>await</code>를 사용하는 것이 훨씬 편리하며, <code>StreamExt</code> 트레잇이 <code>next</code> 메서드를 제공해주기 때문에 이를 활용할 수 있습니다.</p>
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span><span class="boring">use std::pin::Pin;
+</span><span class="boring">use std::task::{Context, Poll};
+</span><span class="boring">
+</span><span class="boring">trait Stream {
+</span><span class="boring">    type Item;
+</span><span class="boring">    fn poll_next(
+</span><span class="boring">        self: Pin&lt;&amp;mut Self&gt;,
+</span><span class="boring">        cx: &amp;mut Context&lt;'_&gt;,
+</span><span class="boring">    ) -&gt; Poll&lt;Option&lt;Self::Item&gt;&gt;;
+</span><span class="boring">}
+</span><span class="boring">
+</span>trait StreamExt: Stream {
+    async fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt;
+    where
+        Self: Unpin;
+
+    // other methods...
+}
+<span class="boring">}</span></code></pre></pre>
+<!--
+TODO: update this if/when tokio/etc. update their MSRV and switch to using async functions
+in traits, since the lack thereof is the reason they do not yet have this.
+-->
+<blockquote>
+<p>참고: 이 장 앞부분에서 사용한 실제 정의는 약간 다릅니다. 이는 트레잇에서 async 함수를 아직 지원하지 않는 Rust 버전도 지원하기 위해서입니다. 그래서 실제로는 다음과 같이 생겼습니다:</p>
+<pre><code class="language-rust ignore">fn next(&amp;mut self) -&gt; Next&lt;'_, Self&gt; where Self: Unpin;</code></pre>
+<p>여기서 <code>Next</code> 타입은 <code>Future</code>를 구현하는 구조체이며, <code>Next&lt;'_, Self&gt;</code>와 같이 <code>self</code>에 대한 참조의 라이프타임을 명시할 수 있게 해줍니다. 덕분에 이 메서드에서 <code>await</code>를 사용할 수 있습니다.</p>
+</blockquote>
+<p><code>StreamExt</code> 트레잇에는 스트림에서 사용할 수 있는 다양한 유용한 메서드들이 정의되어 있습니다. <code>StreamExt</code>는 <code>Stream</code>을 구현하는 모든 타입에 자동으로 구현되지만, 이 두 트레잇을 분리해서 정의한 이유는 핵심 트레잇에 영향을 주지 않고 커뮤니티가 편의 API를 자유롭게 발전시킬 수 있도록 하기 위함입니다.</p>
+<p><code>trpl</code> 크레이트에서 사용하는 <code>StreamExt</code> 버전은 <code>next</code> 메서드뿐만 아니라, <code>Stream::poll_next</code>를 올바르게 호출하는 <code>next</code>의 기본 구현도 제공합니다. 즉, 직접 스트리밍 데이터 타입을 만들어야 할 때에도 <em>오직</em> <code>Stream</code>만 구현하면 되고, 그 타입을 사용하는 사람은 자동으로 <code>StreamExt</code>의 다양한 메서드를 활용할 수 있습니다.</p>
+<p>이제 이 트레잇들의 저수준 동작에 대한 설명은 여기까지입니다. 마지막으로, future(스트림 포함), 태스크, 그리고 스레드가 어떻게 함께 동작하는지 살펴보겠습니다!</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="종합해보기-future-task-그리고-스레드"><a class="header" href="#종합해보기-future-task-그리고-스레드">종합해보기: Future, Task, 그리고 스레드</a></h2>
+<p><a href="https://doc.rust-lang.org/book/ch16-00-concurrency.html">16장</a>에서 살펴본 것처럼, 스레드는 동시성을 제공하는 한 가지 방법입니다. 이번 장에서는 또 다른 방법인 async와 futures, 그리고 streams를 사용하는 방법을 살펴보았습니다. 만약 어떤 방법을 선택해야 할지 궁금하다면, 정답은 “상황에 따라 다르다!”입니다. 그리고 많은 경우, 선택지는 스레드 <em>또는</em> async가 아니라, 스레드 <em>그리고</em> async입니다.</p>
+<p>많은 운영 체제는 수십 년 동안 스레드 기반 동시성 모델을 제공해 왔고, 그 결과 많은 프로그래밍 언어가 이를 지원합니다. 하지만 이러한 모델에도 단점이 있습니다. 많은 운영 체제에서 각 스레드는 상당한 메모리를 사용하며, 시작과 종료에도 오버헤드가 발생합니다. 또한 스레드는 운영 체제와 하드웨어가 이를 지원할 때만 사용할 수 있습니다. 일반적인 데스크톱이나 모바일 컴퓨터와 달리, 일부 임베디드 시스템에는 운영 체제가 아예 없어서 스레드도 존재하지 않습니다.</p>
+<p>async 모델은 이와는 다르고, 궁극적으로는 보완적인 트레이드오프를 제공합니다. async 모델에서는 동시 실행되는 작업마다 별도의 스레드가 필요하지 않습니다. 대신, streams 섹션에서 <code>trpl::spawn_task</code>를 사용해 동기 함수에서 작업을 시작했던 것처럼, 태스크(task)에서 실행할 수 있습니다. 태스크는 스레드와 비슷하지만, 운영 체제가 아니라 라이브러리 수준의 코드, 즉 런타임에 의해 관리된다는 점이 다릅니다.</p>
+<p>이전 섹션에서는 async 채널을 사용하고 동기 코드에서 호출할 수 있는 async 태스크를 생성하여 스트림을 만들 수 있음을 살펴보았습니다. 똑같은 작업을 스레드로도 할 수 있습니다. Listing 17-40에서는 <code>trpl::spawn_task</code>와 <code>trpl::sleep</code>을 사용했지만, Listing 17-41에서는 표준 라이브러리의 <code>thread::spawn</code>과 <code>thread::sleep</code> API로 이를 대체하여 <code>get_intervals</code> 함수에서 사용합니다.</p>
+<Listing number="17-41" caption="`get_intervals` 함수에 async `trpl` API 대신 `std::thread` API를 사용하는 예시" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::{pin::pin, thread, time::Duration};
+</span><span class="boring">
+</span><span class="boring">use trpl::{ReceiverStream, Stream, StreamExt};
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span><span class="boring">        let messages = get_messages().timeout(Duration::from_millis(200));
+</span><span class="boring">        let intervals = get_intervals()
+</span><span class="boring">            .map(|count| format!("Interval #{count}"))
+</span><span class="boring">            .throttle(Duration::from_millis(500))
+</span><span class="boring">            .timeout(Duration::from_secs(10));
+</span><span class="boring">        let merged = messages.merge(intervals).take(20);
+</span><span class="boring">        let mut stream = pin!(merged);
+</span><span class="boring">
+</span><span class="boring">        while let Some(result) = stream.next().await {
+</span><span class="boring">            match result {
+</span><span class="boring">                Ok(item) =&gt; println!("{item}"),
+</span><span class="boring">                Err(reason) =&gt; eprintln!("Problem: {reason:?}"),
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    });
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn get_messages() -&gt; impl Stream&lt;Item = String&gt; {
+</span><span class="boring">    let (tx, rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">    trpl::spawn_task(async move {
+</span><span class="boring">        let messages = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+</span><span class="boring">
+</span><span class="boring">        for (index, message) in messages.into_iter().enumerate() {
+</span><span class="boring">            let time_to_sleep = if index % 2 == 0 { 100 } else { 300 };
+</span><span class="boring">            trpl::sleep(Duration::from_millis(time_to_sleep)).await;
+</span><span class="boring">
+</span><span class="boring">            if let Err(send_error) = tx.send(format!("Message: '{message}'")) {
+</span><span class="boring">                eprintln!("Cannot send message '{message}': {send_error}");
+</span><span class="boring">                break;
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    });
+</span><span class="boring">
+</span><span class="boring">    ReceiverStream::new(rx)
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn get_intervals() -&gt; impl Stream&lt;Item = u32&gt; {
+    let (tx, rx) = trpl::channel();
+
+    // 이것은 *trpl::spawn*이 아니라 *std::thread::spawn*입니다!
+    thread::spawn(move || {
+        let mut count = 0;
+        loop {
+            // 마찬가지로, 이것은 *trpl::sleep*이 아니라 *std::thread::sleep*입니다!
+            thread::sleep(Duration::from_millis(1));
+            count += 1;
+
+            if let Err(send_error) = tx.send(count) {
+                eprintln!("Could not send interval {count}: {send_error}");
+                break;
+            };
+        }
+    });
+
+    ReceiverStream::new(rx)
+}</code></pre></pre>
+</Listing>
+<p>이 코드를 실행하면, 출력 결과는 Listing 17-40과 완전히 동일합니다. 그리고 호출하는 코드의 관점에서 보면, 변경된 부분이 거의 없다는 점도 주목할 만합니다. 더 나아가, 한 함수는 런타임에서 async 태스크를 생성하고, 다른 함수는 OS 스레드를 생성했음에도 불구하고, 결과로 만들어진 스트림에는 아무런 영향이 없었습니다.</p>
+<p>비슷해 보이지만, 이 두 방식은 실제로는 매우 다르게 동작합니다. 물론 이처럼 단순한 예제에서는 그 차이를 측정하기 어려울 수 있습니다. 하지만 현대의 개인용 컴퓨터에서는 수백만 개의 async 태스크를 생성할 수 있습니다. 만약 같은 수의 스레드를 생성하려고 한다면, 실제로 메모리가 모두 소진될 것입니다!</p>
+<p>이러한 API들이 서로 비슷한 이유가 있습니다. 스레드는 동기 작업 집합의 경계 역할을 하며, 스레드 <em>간</em> 동시성이 가능합니다. 태스크는 <em>비동기</em> 작업 집합의 경계 역할을 하며, 태스크 <em>간</em> 뿐만 아니라 태스크 <em>내부</em> 에서도 동시성이 가능합니다. 왜냐하면 태스크는 자신의 본문에서 여러 future 사이를 전환할 수 있기 때문입니다. 마지막으로, future는 러스트에서 가장 세분화된 동시성 단위이며, 각 future는 다른 future들의 트리를 나타낼 수 있습니다. 런타임, 특히 executor가 태스크를 관리하고, 태스크가 future를 관리합니다. 이런 점에서 태스크는 운영 체제가 아닌 런타임이 관리하는, 추가적인 기능이 더해진 경량 스레드와 비슷하다고 할 수 있습니다.</p>
+<p>이는 async 태스크가 항상 스레드보다 더 낫다는 뜻도, 그 반대라는 뜻도 아닙니다. 스레드를 이용한 동시성은 어떤 면에서는 <code>async</code>를 이용한 동시성보다 더 단순한 프로그래밍 모델입니다. 이것이 장점이 될 수도, 단점이 될 수도 있습니다. 스레드는 일종의 “발사 후 잊기(fire and forget)” 방식으로 동작합니다. future에 해당하는 네이티브 개념이 없기 때문에, 운영 체제에 의해 중단되지 않는 한 단순히 끝까지 실행됩니다. 즉, future처럼 <em>태스크 내부 동시성</em> 을 지원하지 않습니다. 또한 러스트의 스레드는 취소(cancellation) 메커니즘이 없습니다. 이 장에서 명시적으로 다루지는 않았지만, future가 종료될 때마다 상태가 올바르게 정리된다는 점에서 암시적으로 언급된 바 있습니다.</p>
+<p>이러한 제약 때문에 스레드는 future보다 조합(composition)이 어렵습니다. 예를 들어, 이 장에서 만들었던 <code>timeout</code>이나 <code>throttle</code>과 같은 헬퍼를 스레드로 구현하는 것은 훨씬 더 어렵습니다. future는 더 풍부한 데이터 구조이기 때문에, 우리가 살펴본 것처럼 자연스럽게 조합할 수 있습니다.</p>
+<p>따라서 태스크는 future에 대해 <em>추가적인</em> 제어권을 제공하여, 어디서 어떻게 묶을지 선택할 수 있게 해줍니다. 그리고 실제로 스레드와 태스크는 종종 매우 잘 어울립니다. 왜냐하면 태스크는 (적어도 일부 런타임에서는) 여러 스레드 사이에서 옮겨질 수 있기 때문입니다. 실제로 우리가 사용해온 런타임, 즉 <code>spawn_blocking</code>과 <code>spawn_task</code> 함수가 포함된 런타임은 기본적으로 멀티스레드로 동작합니다! 많은 런타임은 <em>워크 스틸링(work stealing)</em> 이라는 방식을 사용하여, 각 스레드의 현재 활용도에 따라 태스크를 스레드 간에 투명하게 옮겨 전체 시스템의 성능을 높입니다. 이 방식은 실제로 스레드 <em>그리고</em> 태스크, 그리고 future가 모두 필요합니다.
+어떤 방법을 언제 사용해야 할지 고민할 때는 다음과 같은 경험칙을 참고하세요.</p>
+<ul>
+<li>작업이 <em>매우 병렬화</em> 될 수 있다면, 예를 들어 각 부분을 별도로 처리할 수 있는 대량의 데이터를 처리하는 경우라면, 스레드가 더 나은 선택입니다.</li>
+<li>작업이 <em>매우 동시성</em> 이 요구된다면, 예를 들어 다양한 소스에서 서로 다른 간격이나 속도로 들어오는 메시지를 처리해야 하는 경우라면, async가 더 적합합니다.</li>
+</ul>
+<p>그리고 병렬성과 동시성이 모두 필요하다면, 스레드와 async 중 하나만 선택할 필요가 없습니다. 두 가지를 자유롭게 함께 사용할 수 있으며, 각각이 가장 잘하는 역할을 맡길 수 있습니다. 예를 들어, Listing 17-42는 실제 러스트 코드에서 이러한 조합이 흔히 사용되는 예시를 보여줍니다.</p>
+<Listing number="17-42" caption="스레드에서 블로킹 코드로 메시지를 보내고, async 블록에서 메시지를 기다리는 예시" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // for mdbook test
+</span><span class="boring">
+</span>use std::{thread, time::Duration};
+
+fn main() {
+    let (tx, mut rx) = trpl::channel();
+
+    thread::spawn(move || {
+        for i in 1..11 {
+            tx.send(i).unwrap();
+            thread::sleep(Duration::from_secs(1));
+        }
+    });
+
+    trpl::run(async {
+        while let Some(message) = rx.recv().await {
+            println!("{message}");
+        }
+    });
+}</code></pre></pre>
+</Listing>
+<p>우선 async 채널을 생성한 뒤, 채널의 sender 쪽 소유권을 넘겨받는 스레드를 하나 생성합니다. 이 스레드 안에서는 1부터 10까지의 숫자를 1초씩 쉬면서 전송합니다. 마지막으로, 이번 장에서 계속 사용해온 것처럼 <code>trpl::run</code>에 async 블록을 넘겨 future를 실행합니다. 이 future 안에서는 앞서 살펴본 메시지 전달 예제들과 마찬가지로, 해당 메시지들을 await 합니다.</p>
+<p>이번 장의 서두에서 언급했던 시나리오로 돌아가 보겠습니다. 예를 들어, 비디오 인코딩 작업처럼 계산 집약적인 작업은 전용 스레드에서 실행하고, 해당 작업이 끝났다는 사실을 UI에 알릴 때는 async 채널을 사용하는 상황을 생각해 볼 수 있습니다. 실제로 이런 식의 조합은 현실 세계의 다양한 사용 사례에서 무수히 많이 등장합니다.</p>
+<h2 id="정리"><a class="header" href="#정리">정리</a></h2>
+<p>이 책에서 동시성에 대해 다루는 것은 이번이 마지막이 아닙니다. <a href="https://doc.rust-lang.org/book/ch21-00-final-project-a-web-server.html">21장</a>의 프로젝트에서는 여기서 다룬 간단한 예제들보다 더 현실적인 상황에 이 개념들을 적용하고, 스레드와 태스크를 이용한 문제 해결 방식을 좀 더 직접적으로 비교해 볼 것입니다.</p>
+<p>어떤 방식을 선택하든, 러스트는 안전하고 빠른 동시성 코드를 작성할 수 있는 도구를 제공합니다. 이는 고성능 웹 서버든 임베디드 운영 체제든 마찬가지입니다.</p>
+<p>다음 장에서는 러스트 프로그램이 커질수록 문제를 모델링하고 해법을 구조화하는 관용적인 방법에 대해 이야기하겠습니다. 또한, 러스트의 관용적 스타일이 객체 지향 프로그래밍에서 익숙한 방식과 어떻게 관련되는지도 살펴보겠습니다.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Futures, Tasks, 그리고 Threads - The Rust Programming Language - Async</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="ferris.css">
+        <link rel="stylesheet" href="theme/2018-edition.css">
+        <link rel="stylesheet" href="theme/semantic-notes.css">
+        <link rel="stylesheet" href="theme/listing.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Rust Programming Language - Async</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="종합해보기-future-task-그리고-스레드"><a class="header" href="#종합해보기-future-task-그리고-스레드">종합해보기: Future, Task, 그리고 스레드</a></h2>
+<p><a href="https://doc.rust-lang.org/book/ch16-00-concurrency.html">16장</a>에서 살펴본 것처럼, 스레드는 동시성을 제공하는 한 가지 방법입니다. 이번 장에서는 또 다른 방법인 async와 futures, 그리고 streams를 사용하는 방법을 살펴보았습니다. 만약 어떤 방법을 선택해야 할지 궁금하다면, 정답은 “상황에 따라 다르다!”입니다. 그리고 많은 경우, 선택지는 스레드 <em>또는</em> async가 아니라, 스레드 <em>그리고</em> async입니다.</p>
+<p>많은 운영 체제는 수십 년 동안 스레드 기반 동시성 모델을 제공해 왔고, 그 결과 많은 프로그래밍 언어가 이를 지원합니다. 하지만 이러한 모델에도 단점이 있습니다. 많은 운영 체제에서 각 스레드는 상당한 메모리를 사용하며, 시작과 종료에도 오버헤드가 발생합니다. 또한 스레드는 운영 체제와 하드웨어가 이를 지원할 때만 사용할 수 있습니다. 일반적인 데스크톱이나 모바일 컴퓨터와 달리, 일부 임베디드 시스템에는 운영 체제가 아예 없어서 스레드도 존재하지 않습니다.</p>
+<p>async 모델은 이와는 다르고, 궁극적으로는 보완적인 트레이드오프를 제공합니다. async 모델에서는 동시 실행되는 작업마다 별도의 스레드가 필요하지 않습니다. 대신, streams 섹션에서 <code>trpl::spawn_task</code>를 사용해 동기 함수에서 작업을 시작했던 것처럼, 태스크(task)에서 실행할 수 있습니다. 태스크는 스레드와 비슷하지만, 운영 체제가 아니라 라이브러리 수준의 코드, 즉 런타임에 의해 관리된다는 점이 다릅니다.</p>
+<p>이전 섹션에서는 async 채널을 사용하고 동기 코드에서 호출할 수 있는 async 태스크를 생성하여 스트림을 만들 수 있음을 살펴보았습니다. 똑같은 작업을 스레드로도 할 수 있습니다. Listing 17-40에서는 <code>trpl::spawn_task</code>와 <code>trpl::sleep</code>을 사용했지만, Listing 17-41에서는 표준 라이브러리의 <code>thread::spawn</code>과 <code>thread::sleep</code> API로 이를 대체하여 <code>get_intervals</code> 함수에서 사용합니다.</p>
+<Listing number="17-41" caption="`get_intervals` 함수에 async `trpl` API 대신 `std::thread` API를 사용하는 예시" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
+</span><span class="boring">
+</span><span class="boring">use std::{pin::pin, thread, time::Duration};
+</span><span class="boring">
+</span><span class="boring">use trpl::{ReceiverStream, Stream, StreamExt};
+</span><span class="boring">
+</span><span class="boring">fn main() {
+</span><span class="boring">    trpl::run(async {
+</span><span class="boring">        let messages = get_messages().timeout(Duration::from_millis(200));
+</span><span class="boring">        let intervals = get_intervals()
+</span><span class="boring">            .map(|count| format!("Interval #{count}"))
+</span><span class="boring">            .throttle(Duration::from_millis(500))
+</span><span class="boring">            .timeout(Duration::from_secs(10));
+</span><span class="boring">        let merged = messages.merge(intervals).take(20);
+</span><span class="boring">        let mut stream = pin!(merged);
+</span><span class="boring">
+</span><span class="boring">        while let Some(result) = stream.next().await {
+</span><span class="boring">            match result {
+</span><span class="boring">                Ok(item) =&gt; println!("{item}"),
+</span><span class="boring">                Err(reason) =&gt; eprintln!("Problem: {reason:?}"),
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    });
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring">fn get_messages() -&gt; impl Stream&lt;Item = String&gt; {
+</span><span class="boring">    let (tx, rx) = trpl::channel();
+</span><span class="boring">
+</span><span class="boring">    trpl::spawn_task(async move {
+</span><span class="boring">        let messages = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+</span><span class="boring">
+</span><span class="boring">        for (index, message) in messages.into_iter().enumerate() {
+</span><span class="boring">            let time_to_sleep = if index % 2 == 0 { 100 } else { 300 };
+</span><span class="boring">            trpl::sleep(Duration::from_millis(time_to_sleep)).await;
+</span><span class="boring">
+</span><span class="boring">            if let Err(send_error) = tx.send(format!("Message: '{message}'")) {
+</span><span class="boring">                eprintln!("Cannot send message '{message}': {send_error}");
+</span><span class="boring">                break;
+</span><span class="boring">            }
+</span><span class="boring">        }
+</span><span class="boring">    });
+</span><span class="boring">
+</span><span class="boring">    ReceiverStream::new(rx)
+</span><span class="boring">}
+</span><span class="boring">
+</span>fn get_intervals() -&gt; impl Stream&lt;Item = u32&gt; {
+    let (tx, rx) = trpl::channel();
+
+    // 이것은 *trpl::spawn*이 아니라 *std::thread::spawn*입니다!
+    thread::spawn(move || {
+        let mut count = 0;
+        loop {
+            // 마찬가지로, 이것은 *trpl::sleep*이 아니라 *std::thread::sleep*입니다!
+            thread::sleep(Duration::from_millis(1));
+            count += 1;
+
+            if let Err(send_error) = tx.send(count) {
+                eprintln!("Could not send interval {count}: {send_error}");
+                break;
+            };
+        }
+    });
+
+    ReceiverStream::new(rx)
+}</code></pre></pre>
+</Listing>
+<p>이 코드를 실행하면, 출력 결과는 Listing 17-40과 완전히 동일합니다. 그리고 호출하는 코드의 관점에서 보면, 변경된 부분이 거의 없다는 점도 주목할 만합니다. 더 나아가, 한 함수는 런타임에서 async 태스크를 생성하고, 다른 함수는 OS 스레드를 생성했음에도 불구하고, 결과로 만들어진 스트림에는 아무런 영향이 없었습니다.</p>
+<p>비슷해 보이지만, 이 두 방식은 실제로는 매우 다르게 동작합니다. 물론 이처럼 단순한 예제에서는 그 차이를 측정하기 어려울 수 있습니다. 하지만 현대의 개인용 컴퓨터에서는 수백만 개의 async 태스크를 생성할 수 있습니다. 만약 같은 수의 스레드를 생성하려고 한다면, 실제로 메모리가 모두 소진될 것입니다!</p>
+<p>이러한 API들이 서로 비슷한 이유가 있습니다. 스레드는 동기 작업 집합의 경계 역할을 하며, 스레드 <em>간</em> 동시성이 가능합니다. 태스크는 <em>비동기</em> 작업 집합의 경계 역할을 하며, 태스크 <em>간</em> 뿐만 아니라 태스크 <em>내부</em> 에서도 동시성이 가능합니다. 왜냐하면 태스크는 자신의 본문에서 여러 future 사이를 전환할 수 있기 때문입니다. 마지막으로, future는 러스트에서 가장 세분화된 동시성 단위이며, 각 future는 다른 future들의 트리를 나타낼 수 있습니다. 런타임, 특히 executor가 태스크를 관리하고, 태스크가 future를 관리합니다. 이런 점에서 태스크는 운영 체제가 아닌 런타임이 관리하는, 추가적인 기능이 더해진 경량 스레드와 비슷하다고 할 수 있습니다.</p>
+<p>이는 async 태스크가 항상 스레드보다 더 낫다는 뜻도, 그 반대라는 뜻도 아닙니다. 스레드를 이용한 동시성은 어떤 면에서는 <code>async</code>를 이용한 동시성보다 더 단순한 프로그래밍 모델입니다. 이것이 장점이 될 수도, 단점이 될 수도 있습니다. 스레드는 일종의 “발사 후 잊기(fire and forget)” 방식으로 동작합니다. future에 해당하는 네이티브 개념이 없기 때문에, 운영 체제에 의해 중단되지 않는 한 단순히 끝까지 실행됩니다. 즉, future처럼 <em>태스크 내부 동시성</em> 을 지원하지 않습니다. 또한 러스트의 스레드는 취소(cancellation) 메커니즘이 없습니다. 이 장에서 명시적으로 다루지는 않았지만, future가 종료될 때마다 상태가 올바르게 정리된다는 점에서 암시적으로 언급된 바 있습니다.</p>
+<p>이러한 제약 때문에 스레드는 future보다 조합(composition)이 어렵습니다. 예를 들어, 이 장에서 만들었던 <code>timeout</code>이나 <code>throttle</code>과 같은 헬퍼를 스레드로 구현하는 것은 훨씬 더 어렵습니다. future는 더 풍부한 데이터 구조이기 때문에, 우리가 살펴본 것처럼 자연스럽게 조합할 수 있습니다.</p>
+<p>따라서 태스크는 future에 대해 <em>추가적인</em> 제어권을 제공하여, 어디서 어떻게 묶을지 선택할 수 있게 해줍니다. 그리고 실제로 스레드와 태스크는 종종 매우 잘 어울립니다. 왜냐하면 태스크는 (적어도 일부 런타임에서는) 여러 스레드 사이에서 옮겨질 수 있기 때문입니다. 실제로 우리가 사용해온 런타임, 즉 <code>spawn_blocking</code>과 <code>spawn_task</code> 함수가 포함된 런타임은 기본적으로 멀티스레드로 동작합니다! 많은 런타임은 <em>워크 스틸링(work stealing)</em> 이라는 방식을 사용하여, 각 스레드의 현재 활용도에 따라 태스크를 스레드 간에 투명하게 옮겨 전체 시스템의 성능을 높입니다. 이 방식은 실제로 스레드 <em>그리고</em> 태스크, 그리고 future가 모두 필요합니다.
+어떤 방법을 언제 사용해야 할지 고민할 때는 다음과 같은 경험칙을 참고하세요.</p>
+<ul>
+<li>작업이 <em>매우 병렬화</em> 될 수 있다면, 예를 들어 각 부분을 별도로 처리할 수 있는 대량의 데이터를 처리하는 경우라면, 스레드가 더 나은 선택입니다.</li>
+<li>작업이 <em>매우 동시성</em> 이 요구된다면, 예를 들어 다양한 소스에서 서로 다른 간격이나 속도로 들어오는 메시지를 처리해야 하는 경우라면, async가 더 적합합니다.</li>
+</ul>
+<p>그리고 병렬성과 동시성이 모두 필요하다면, 스레드와 async 중 하나만 선택할 필요가 없습니다. 두 가지를 자유롭게 함께 사용할 수 있으며, 각각이 가장 잘하는 역할을 맡길 수 있습니다. 예를 들어, Listing 17-42는 실제 러스트 코드에서 이러한 조합이 흔히 사용되는 예시를 보여줍니다.</p>
+<Listing number="17-42" caption="스레드에서 블로킹 코드로 메시지를 보내고, async 블록에서 메시지를 기다리는 예시" file-name="src/main.rs">
+<pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // for mdbook test
+</span><span class="boring">
+</span>use std::{thread, time::Duration};
+
+fn main() {
+    let (tx, mut rx) = trpl::channel();
+
+    thread::spawn(move || {
+        for i in 1..11 {
+            tx.send(i).unwrap();
+            thread::sleep(Duration::from_secs(1));
+        }
+    });
+
+    trpl::run(async {
+        while let Some(message) = rx.recv().await {
+            println!("{message}");
+        }
+    });
+}</code></pre></pre>
+</Listing>
+<p>우선 async 채널을 생성한 뒤, 채널의 sender 쪽 소유권을 넘겨받는 스레드를 하나 생성합니다. 이 스레드 안에서는 1부터 10까지의 숫자를 1초씩 쉬면서 전송합니다. 마지막으로, 이번 장에서 계속 사용해온 것처럼 <code>trpl::run</code>에 async 블록을 넘겨 future를 실행합니다. 이 future 안에서는 앞서 살펴본 메시지 전달 예제들과 마찬가지로, 해당 메시지들을 await 합니다.</p>
+<p>이번 장의 서두에서 언급했던 시나리오로 돌아가 보겠습니다. 예를 들어, 비디오 인코딩 작업처럼 계산 집약적인 작업은 전용 스레드에서 실행하고, 해당 작업이 끝났다는 사실을 UI에 알릴 때는 async 채널을 사용하는 상황을 생각해 볼 수 있습니다. 실제로 이런 식의 조합은 현실 세계의 다양한 사용 사례에서 무수히 많이 등장합니다.</p>
+<h2 id="정리"><a class="header" href="#정리">정리</a></h2>
+<p>이 책에서 동시성에 대해 다루는 것은 이번이 마지막이 아닙니다. <a href="https://doc.rust-lang.org/book/ch21-00-final-project-a-web-server.html">21장</a>의 프로젝트에서는 여기서 다룬 간단한 예제들보다 더 현실적인 상황에 이 개념들을 적용하고, 스레드와 태스크를 이용한 문제 해결 방식을 좀 더 직접적으로 비교해 볼 것입니다.</p>
+<p>어떤 방식을 선택하든, 러스트는 안전하고 빠른 동시성 코드를 작성할 수 있는 도구를 제공합니다. 이는 고성능 웹 서버든 임베디드 운영 체제든 마찬가지입니다.</p>
+<p>다음 장에서는 러스트 프로그램이 커질수록 문제를 모델링하고 해법을 구조화하는 관용적인 방법에 대해 이야기하겠습니다. 또한, 러스트의 관용적 스타일이 객체 지향 프로그래밍에서 익숙한 방식과 어떻게 관련되는지도 살펴보겠습니다.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch17-05-traits-for-async.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch17-05-traits-for-async.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="ferris.js"></script>
+
+
+    </div>
+    </body>
+</html>

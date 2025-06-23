@@ -12,6 +12,7 @@ additional-css = [
     "theme/listing.css",
 ]
 additional-js = ["ferris.js"]
+git-repository-url = "https://github.com/kimjeonghan0625/rust-lang-book-async-ko"
 
 # Do not sync this preprocessor; it is for the HTML renderer only.
 [preprocessor.trpl-note]

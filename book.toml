@@ -1,0 +1,23 @@
+[book]
+authors = ["jh-mac"]
+language = "en"
+src = "src"
+title = "The Rust Programming Language - Async"
+
+[output.html]
+additional-css = [
+    "ferris.css",
+    "theme/2018-edition.css",
+    "theme/semantic-notes.css",
+    "theme/listing.css",
+]
+additional-js = ["ferris.js"]
+
+# Do not sync this preprocessor; it is for the HTML renderer only.
+[preprocessor.trpl-note]
+
+[preprocessor.trpl-listing]
+output-mode = "default"
+
+[rust]
+edition = "2024"

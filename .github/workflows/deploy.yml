@@ -17,6 +17,8 @@ jobs:
           echo "$(pwd)/bin" >> "${GITHUB_PATH}"
       - name: Build book
         run: mdbook build
+      - name: Copy Google verification file to book root
+        run: cp googled521aa6affb4ec4e.html book/
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:

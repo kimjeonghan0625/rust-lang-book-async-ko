@@ -756,7 +756,7 @@ hi number 9 from the first task!
 </span><span class="boring">}</span></code></pre></pre>
 <figcaption><a href="ch17-02-concurrency-with-async.html#listing-17-12">Listing 17-12</a>: Listing 17-11의 코드를 수정하여 모든 작업이 끝나면 올바르게 종료되도록 한 예제</figcaption>
 </figure>
-이 async 채널 역시 다중 생산자 채널이므로, 여러 future에서 메시지를 보내고 싶다면 `tx`에 대해 `clone`을 호출할 수 있습니다. Listing 17-13에서처럼 사용할 수 있습니다.
+<p>이 async 채널 역시 다중 생산자 채널이므로, 여러 future에서 메시지를 보내고 싶다면 <code>tx</code>에 대해 <code>clone</code>을 호출할 수 있습니다. Listing 17-13에서처럼 사용할 수 있습니다.</p>
 <figure class="listing" id="listing-17-13">
 <span class="file-name">Filename: src/main.rs</span>
 <pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test

@@ -211,6 +211,7 @@ Listing 17-12에서는 메시지를 보내는 블록을 `async`에서 `async mov
 ```
 
 </Listing>
+
 이 async 채널 역시 다중 생산자 채널이므로, 여러 future에서 메시지를 보내고 싶다면 `tx`에 대해 `clone`을 호출할 수 있습니다. Listing 17-13에서처럼 사용할 수 있습니다.
 
 <Listing number="17-13" caption="여러 프로듀서를 async 블록과 함께 사용하기" file-name="src/main.rs">

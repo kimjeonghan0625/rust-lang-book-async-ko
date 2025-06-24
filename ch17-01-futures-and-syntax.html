@@ -161,7 +161,7 @@
                     <main>
                         <h2 id="future와-async-문법"><a class="header" href="#future와-async-문법">Future와 Async 문법</a></h2>
 <p>Rust에서 비동기 프로그래밍의 핵심 요소는 <em>future</em>와 Rust의 <code>async</code>, <code>await</code> 키워드입니다.</p>
-<p><em>future</em>란 지금은 준비되지 않았지만 언젠가는 준비될 값입니다. (이와 비슷한 개념은 여러 언어에서 <em>task</em>나 <em>promise</em> 등 다양한 이름으로 등장합니다.) Rust는 다양한 비동기 연산을 서로 다른 데이터 구조로 구현하더라도 공통된 인터페이스를 제공할 수 있도록 <code>Future</code> 트레이트를 제공합니다. Rust에서 future는 <code>Future</code> 트레이트를 구현하는 타입입니다. 각 future는 자신만의 진행 상황과 "준비됨"이 무엇을 의미하는지에 대한 정보를 가지고 있습니다.</p>
+<p><em>future</em>란 지금은 준비되지 않았지만 언젠가는 준비될 값입니다. (이와 비슷한 개념은 여러 언어에서 <em>task</em>나 <em>promise</em> 등 다양한 이름으로 등장합니다.) Rust는 다양한 비동기 연산을 서로 다른 데이터 구조로 구현하더라도 공통된 인터페이스를 제공할 수 있도록 <code>Future</code> 트레이트를 제공합니다. Rust에서 future는 <code>Future</code> 트레이트를 구현하는 타입입니다. 각 future는 자신만의 진행 상황과 “준비됨“이 무엇을 의미하는지에 대한 정보를 가지고 있습니다.</p>
 <p><code>async</code> 키워드는 블록이나 함수에 적용하여 해당 코드가 중단되고 다시 재개될 수 있음을 명시합니다. async 블록이나 async 함수 내부에서는 <code>await</code> 키워드를 사용해 <em>future를 기다릴</em> 수 있습니다(즉, future가 준비될 때까지 대기합니다). async 블록이나 함수 내에서 future를 await하는 모든 지점은 해당 블록이나 함수가 일시 중지되고 다시 시작될 수 있는 잠재적인 위치입니다. future가 값을 사용할 수 있는지 확인하는 과정을 <em>폴링(polling)</em> 이라고 합니다.</p>
 <p>C#나 JavaScript와 같은 다른 언어들도 비동기 프로그래밍을 위해 <code>async</code>와 <code>await</code> 키워드를 사용합니다. 만약 이러한 언어에 익숙하다면, Rust가 문법을 처리하는 방식 등에서 상당한 차이점이 있다는 것을 알 수 있을 것입니다. 이는 충분한 이유가 있기 때문이며, 곧 그 이유를 살펴보겠습니다!</p>
 <p>비동기 Rust 코드를 작성할 때는 대부분 <code>async</code>와 <code>await</code> 키워드를 사용합니다. Rust는 이 키워드들을 <code>Future</code> 트레이트를 활용하는 동등한 코드로 컴파일합니다. 이는 Rust가 <code>for</code> 루프를 <code>Iterator</code> 트레이트를 사용하는 코드로 변환하는 것과 비슷합니다. Rust는 <code>Future</code> 트레이트를 제공하기 때문에, 필요하다면 여러분만의 데이터 타입에 대해 직접 구현할 수도 있습니다. 이 장에서 살펴볼 많은 함수들은 각자 자신만의 <code>Future</code> 구현을 반환합니다. 트레이트의 정의와 동작 방식에 대해서는 이 장의 마지막에서 다시 다루겠지만, 지금은 이 정도만 알아도 앞으로 내용을 이해하는 데 충분합니다.</p>
@@ -177,7 +177,8 @@ $ cargo add trpl
 <p>이제 <code>trpl</code>이 제공하는 다양한 요소들을 활용해 우리의 첫 번째 async 프로그램을 작성해볼 수 있습니다. 두 개의 웹 페이지를 가져와 각각의 <code>&lt;title&gt;</code> 요소를 추출하고, 이 모든 과정을 가장 먼저 끝낸 페이지의 제목을 출력하는 간단한 커맨드라인 도구를 만들어보겠습니다.</p>
 <h3 id="page_title-함수-정의하기"><a class="header" href="#page_title-함수-정의하기">page_title 함수 정의하기</a></h3>
 <p>먼저, 하나의 페이지 URL을 매개변수로 받아 요청을 보내고, 해당 페이지의 <code>&lt;title&gt;</code> 요소의 텍스트를 반환하는 함수를 작성해봅시다(Listing 17-1 참고).</p>
-<Listing number="17-1" file-name="src/main.rs" caption="HTML 페이지에서 title 요소를 가져오는 async 함수 정의하기">
+<figure class="listing" id="listing-17-1">
+<span class="file-name">Filename: src/main.rs</span>
 <pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
 </span><span class="boring">
 </span><span class="boring">fn main() {
@@ -193,7 +194,8 @@ async fn page_title(url: &amp;str) -&gt; Option&lt;String&gt; {
         .select_first("title")
         .map(|title_element| title_element.inner_html())
 }</code></pre></pre>
-</Listing>
+<figcaption><a href="#listing-17-1">Listing 17-1</a>: HTML 페이지에서 title 요소를 가져오는 async 함수 정의하기</figcaption>
+</figure>
 <p>먼저, <code>page_title</code>라는 이름의 함수를 정의하고 <code>async</code> 키워드로 표시합니다. 그런 다음, 전달받은 URL을 가져오기 위해 <code>trpl::get</code> 함수를 사용하고, 응답을 기다리기 위해 <code>await</code> 키워드를 추가합니다. 응답의 텍스트를 얻기 위해서는 해당 응답의 <code>text</code> 메서드를 호출하고, 다시 한 번 <code>await</code> 키워드로 기다립니다. 이 두 단계 모두 비동기적으로 동작합니다. <code>get</code> 함수의 경우, 서버가 HTTP 헤더, 쿠키 등과 같은 응답의 첫 부분을 보내줄 때까지 기다려야 하며, 이 정보들은 응답 본문과 별도로 전달될 수 있습니다. 특히 본문이 매우 클 경우, 전체가 도착하는 데 시간이 걸릴 수 있습니다. 우리는 응답의 <em>전체</em>가 도착할 때까지 기다려야 하므로, <code>text</code> 메서드 역시 async입니다.</p>
 <p>이 두 future 모두를 명시적으로 await해야 합니다. Rust에서 future는 <em>게으르기(lazy)</em> 때문에, <code>await</code> 키워드를 사용해 요청하기 전까지 아무 일도 하지 않습니다. (실제로 future를 사용하지 않으면 Rust가 컴파일러 경고를 표시합니다.) 이는 13장에서 반복자(iterator)에 대해 다룬 <a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">반복자로 일련의 아이템들 처리하기</a><!-- ignore --> 부분을 떠올리게 할 수 있습니다. 반복자는 <code>next</code> 메서드를 직접 호출하거나, <code>for</code> 루프 또는 내부적으로 <code>next</code>를 사용하는 <code>map</code> 같은 메서드를 통해 호출하지 않는 한 아무 일도 하지 않습니다. 마찬가지로, future도 명시적으로 요청하지 않으면 아무 일도 하지 않습니다. 이러한 게으름(laziness) 덕분에 Rust는 실제로 필요할 때까지 비동기 코드를 실행하지 않을 수 있습니다.</p>
 <blockquote>
@@ -201,7 +203,8 @@ async fn page_title(url: &amp;str) -&gt; Option&lt;String&gt; {
 </blockquote>
 <p><code>response_text</code>를 얻은 후에는 <code>Html::parse</code>를 사용해 이를 <code>Html</code> 타입의 인스턴스로 파싱할 수 있습니다. 이제 단순한 문자열이 아니라, HTML을 더 풍부한 데이터 구조로 다룰 수 있는 타입을 갖게 됩니다. 특히, <code>select_first</code> 메서드를 사용하면 주어진 CSS 셀렉터에 해당하는 첫 번째 요소를 찾을 수 있습니다. 문자열 <code>"title"</code>을 전달하면, 문서 내에 <code>&lt;title&gt;</code> 요소가 있다면 그 중 첫 번째 요소를 가져옵니다. 일치하는 요소가 없을 수도 있기 때문에, <code>select_first</code>는 <code>Option&lt;ElementRef&gt;</code>를 반환합니다. 마지막으로, <code>Option</code>에 값이 있을 때만 해당 값으로 작업할 수 있도록 해주는 <code>Option::map</code> 메서드를 사용합니다. (여기서 <code>match</code> 표현식을 사용할 수도 있지만, <code>map</code>이 더 관용적입니다.) <code>map</code>에 전달하는 함수의 본문에서는 <code>title_element</code>에 대해 <code>inner_html</code>을 호출해 그 내용을 <code>String</code>으로 얻습니다. 이 모든 과정을 거치면, 최종적으로 <code>Option&lt;String&gt;</code>을 얻게 됩니다.</p>
 <p>Rust의 <code>await</code> 키워드는 기다릴 표현식 <em>뒤에</em> 위치한다는 점에 주목하세요. 즉, <em>접미사(postfix)</em> 키워드입니다. 만약 다른 언어에서 <code>async</code>를 사용해본 경험이 있다면 이 부분이 다르게 느껴질 수 있지만, Rust에서는 메서드 체이닝을 훨씬 더 깔끔하게 작성할 수 있게 해줍니다. 그 결과, Listing 17-2에서 보듯이 <code>page_title</code> 함수의 본문에서 <code>trpl::get</code>과 <code>text</code> 함수 호출을 <code>await</code>로 연결해 체이닝할 수 있습니다.</p>
-<Listing number="17-2" file-name="src/main.rs" caption="`await` 키워드로 체이닝하기">
+<figure class="listing" id="listing-17-2">
+<span class="file-name">Filename: src/main.rs</span>
 <pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
 </span><span class="boring">
 </span><span class="boring">use trpl::Html;
@@ -216,7 +219,8 @@ async fn page_title(url: &amp;str) -&gt; Option&lt;String&gt; {
 </span><span class="boring">        .select_first("title")
 </span><span class="boring">        .map(|title_element| title_element.inner_html())
 </span><span class="boring">}</span></code></pre></pre>
-</Listing>
+<figcaption><a href="#listing-17-2">Listing 17-2</a>: <code>await</code> 키워드로 체이닝하기</figcaption>
+</figure>
 <p>이렇게 해서 우리의 첫 번째 async 함수를 성공적으로 작성했습니다! 이제 <code>main</code>에서 이 함수를 호출하는 코드를 추가하기 전에, 우리가 작성한 코드가 의미하는 바를 조금 더 살펴보겠습니다.</p>
 <p>Rust가 <code>async</code> 키워드가 붙은 블록을 만나면, 해당 블록을 <code>Future</code> 트레이트를 구현하는 고유하고 익명인 데이터 타입으로 컴파일합니다. 함수에 <code>async</code>가 붙으면, Rust는 해당 함수를 비동기 블록을 본문으로 갖는 일반 함수로 컴파일합니다. async 함수의 반환 타입은 컴파일러가 해당 async 블록을 위해 생성한 익명 타입이 됩니다.</p>
 <p>즉, <code>async fn</code>을 작성하는 것은 반환 타입의 <em>future</em>를 반환하는 함수를 작성하는 것과 같습니다. 컴파일러 입장에서는 Listing 17-1의 <code>async fn page_title</code>과 같은 함수 정의는 아래와 같이 비동기 함수가 아닌 형태로 정의한 것과 동등합니다:</p>
@@ -246,7 +250,8 @@ fn page_title(url: &amp;str) -&gt; impl Future&lt;Output = Option&lt;String&gt;&
 <p>이제 <code>main</code>에서 <code>page_title</code>을 호출할 수 있습니다.</p>
 <h2 id="단일-페이지의-제목-가져오기"><a class="header" href="#단일-페이지의-제목-가져오기">단일 페이지의 제목 가져오기</a></h2>
 <p>먼저, 한 페이지만의 제목을 가져와 보겠습니다. Listing 17-3에서는 12장에서 <a href="https://doc.rust-lang.org/book/ch12-01-accepting-command-line-arguments.html">커맨드라인 인자 받기</a><!-- ignore --> 절에서 사용했던 것과 동일한 패턴으로 커맨드라인 인자를 받아옵니다. 그런 다음 첫 번째 URL을 <code>page_title</code> 함수에 전달하고, 결과를 await합니다. future가 반환하는 값은 <code>Option&lt;String&gt;</code>이므로, 해당 페이지에 <code>&lt;title&gt;</code>이 있는지 여부에 따라 다른 메시지를 출력하기 위해 <code>match</code> 표현식을 사용합니다.</p>
-<Listing number="17-3" file-name="src/main.rs" caption="사용자가 입력한 인자를 받아 `main`에서 `page_title` 함수를 호출하기">
+<figure class="listing" id="listing-17-3">
+<span class="file-name">Filename: src/main.rs</span>
 <pre><code class="language-rust ignore does_not_compile"><span class="boring">extern crate trpl; // required for mdbook test
 </span><span class="boring">
 </span><span class="boring">use trpl::Html;
@@ -266,7 +271,8 @@ fn page_title(url: &amp;str) -&gt; impl Future&lt;Output = Option&lt;String&gt;&
 </span><span class="boring">        .select_first("title")
 </span><span class="boring">        .map(|title_element| title_element.inner_html())
 </span><span class="boring">}</span></code></pre>
-</Listing>
+<figcaption><a href="#listing-17-3">Listing 17-3</a>: 사용자가 입력한 인자를 받아 <code>main</code>에서 <code>page_title</code> 함수를 호출하기</figcaption>
+</figure>
 <p>안타깝게도 이 코드는 컴파일되지 않습니다. <code>await</code> 키워드는 오직 async 함수나 블록 안에서만 사용할 수 있으며, Rust에서는 특별한 함수인 <code>main</code>에 <code>async</code>를 붙이는 것을 허용하지 않습니다.</p>
 <!-- manual-regeneration
 cd listings/ch17-async-await/listing-17-03
@@ -283,7 +289,8 @@ copy just the compiler error
 <p>비동기를 지원하는 대부분의 언어는 런타임을 내장하고 있지만, Rust는 그렇지 않습니다. 대신, 다양한 용도에 맞춰 서로 다른 트레이드오프를 가진 여러 비동기 런타임이 존재합니다. 예를 들어, 많은 CPU 코어와 대용량 RAM을 가진 고성능 웹 서버와, 단일 코어에 적은 RAM, 힙 할당이 불가능한 마이크로컨트롤러는 요구 사항이 매우 다릅니다. 이러한 런타임을 제공하는 크레이트들은 파일이나 네트워크 I/O와 같은 일반적인 기능의 비동기 버전도 함께 제공합니다.</p>
 <p>이 장과 이후의 예제에서는 <code>trpl</code> 크레이트의 <code>run</code> 함수를 사용할 것입니다. 이 함수는 future를 인자로 받아 끝까지 실행합니다. 내부적으로 <code>run</code>을 호출하면 future를 실행할 런타임이 설정되고, future가 완료되면 그 결과 값을 반환합니다.</p>
 <p><code>page_title</code>이 반환하는 future를 바로 <code>run</code>에 넘길 수도 있습니다. 이 경우 future가 완료되면, Listing 17-3에서 시도했던 것처럼 결과로 받은 <code>Option&lt;String&gt;</code>에 대해 match를 사용할 수 있습니다. 하지만 이 장의 대부분 예제(그리고 실제 비동기 코드)에서는 단일 async 함수 호출만 하는 것이 아니라 여러 작업을 수행하므로, 대신 <code>async</code> 블록을 넘기고 그 안에서 <code>page_title</code>의 결과를 명시적으로 await하는 방식을 사용할 것입니다(Listing 17-4 참고).</p>
-<Listing number="17-4" caption="`trpl::run`으로 async 블록을 await하기" file-name="src/main.rs">
+<figure class="listing" id="listing-17-4">
+<span class="file-name">Filename: src/main.rs</span>
 <!-- should_panic,noplayground because mdbook test does not pass args -->
 <pre><code class="language-rust should_panic noplayground"><span class="boring">extern crate trpl; // required for mdbook test
 </span><span class="boring">
@@ -307,7 +314,8 @@ copy just the compiler error
 </span><span class="boring">        .select_first("title")
 </span><span class="boring">        .map(|title_element| title_element.inner_html())
 </span><span class="boring">}</span></code></pre>
-</Listing>
+<figcaption><a href="#listing-17-4">Listing 17-4</a>: <code>trpl::run</code>으로 async 블록을 await하기</figcaption>
+</figure>
 <p>이 코드를 실행하면, 처음에 기대했던 대로 동작하는 것을 확인할 수 있습니다:</p>
 <!-- manual-regeneration
 cd listings/ch17-async-await/listing-17-04
@@ -342,7 +350,8 @@ The title for https://www.rust-lang.org was
 <p>이제 지금까지 살펴본 내용을 바탕으로, 실제로 어떻게 동시성 코드를 작성할 수 있는지 함께 살펴보겠습니다.</p>
 <h3 id="두-url을-서로-경쟁시키기"><a class="header" href="#두-url을-서로-경쟁시키기">두 URL을 서로 경쟁시키기</a></h3>
 <p>Listing 17-5에서는 커맨드라인에서 전달받은 두 개의 URL을 <code>page_title</code> 함수에 넘기고, 이 둘을 경쟁(race)시킵니다.</p>
-<Listing number="17-5" caption="" file-name="src/main.rs">
+<figure class="listing" id="listing-17-5">
+<span class="file-name">Filename: src/main.rs</span>
 <!-- should_panic,noplayground because mdbook does not pass args -->
 <pre><code class="language-rust should_panic noplayground"><span class="boring">extern crate trpl; // required for mdbook test
 </span><span class="boring">
@@ -376,7 +385,8 @@ async fn page_title(url: &amp;str) -&gt; (&amp;str, Option&lt;String&gt;) {
         .map(|title| title.inner_html());
     (url, title)
 }</code></pre>
-</Listing>
+<figcaption><a href="#listing-17-5">Listing 17-5</a>: </figcaption>
+</figure>
 <p>먼저, 사용자가 입력한 각 URL에 대해 <code>page_title</code> 함수를 호출합니다. 이렇게 생성된 future를 각각 <code>title_fut_1</code>과 <code>title_fut_2</code>에 저장합니다. 이 future들은 아직 아무 일도 하지 않는다는 점을 기억하세요. future는 게으르기 때문에, 우리가 아직 await하지 않았기 때문입니다. 그런 다음 이 future들을 <code>trpl::race</code>에 전달하면, 둘 중 어떤 future가 먼저 완료되는지 알려주는 값을 반환합니다.</p>
 <blockquote>
 <p>참고: 내부적으로 <code>race</code>는 더 일반적인 함수인 <code>select</code>를 기반으로 구현되어 있습니다. 실제 Rust 코드에서는 <code>select</code> 함수를 더 자주 접하게 될 것입니다. <code>select</code> 함수는 <code>trpl::race</code> 함수로는 할 수 없는 다양한 작업을 수행할 수 있지만, 그만큼 추가적인 복잡성도 있으므로 지금은 자세히 다루지 않겠습니다.</p>

@@ -164,7 +164,8 @@
 <p>많은 운영 체제는 수십 년 동안 스레드 기반 동시성 모델을 제공해 왔고, 그 결과 많은 프로그래밍 언어가 이를 지원합니다. 하지만 이러한 모델에도 단점이 있습니다. 많은 운영 체제에서 각 스레드는 상당한 메모리를 사용하며, 시작과 종료에도 오버헤드가 발생합니다. 또한 스레드는 운영 체제와 하드웨어가 이를 지원할 때만 사용할 수 있습니다. 일반적인 데스크톱이나 모바일 컴퓨터와 달리, 일부 임베디드 시스템에는 운영 체제가 아예 없어서 스레드도 존재하지 않습니다.</p>
 <p>async 모델은 이와는 다르고, 궁극적으로는 보완적인 트레이드오프를 제공합니다. async 모델에서는 동시 실행되는 작업마다 별도의 스레드가 필요하지 않습니다. 대신, streams 섹션에서 <code>trpl::spawn_task</code>를 사용해 동기 함수에서 작업을 시작했던 것처럼, 태스크(task)에서 실행할 수 있습니다. 태스크는 스레드와 비슷하지만, 운영 체제가 아니라 라이브러리 수준의 코드, 즉 런타임에 의해 관리된다는 점이 다릅니다.</p>
 <p>이전 섹션에서는 async 채널을 사용하고 동기 코드에서 호출할 수 있는 async 태스크를 생성하여 스트림을 만들 수 있음을 살펴보았습니다. 똑같은 작업을 스레드로도 할 수 있습니다. Listing 17-40에서는 <code>trpl::spawn_task</code>와 <code>trpl::sleep</code>을 사용했지만, Listing 17-41에서는 표준 라이브러리의 <code>thread::spawn</code>과 <code>thread::sleep</code> API로 이를 대체하여 <code>get_intervals</code> 함수에서 사용합니다.</p>
-<Listing number="17-41" caption="`get_intervals` 함수에 async `trpl` API 대신 `std::thread` API를 사용하는 예시" file-name="src/main.rs">
+<figure class="listing" id="listing-17-41">
+<span class="file-name">Filename: src/main.rs</span>
 <pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // required for mdbook test
 </span><span class="boring">
 </span><span class="boring">use std::{pin::pin, thread, time::Duration};
@@ -230,7 +231,8 @@
 
     ReceiverStream::new(rx)
 }</code></pre></pre>
-</Listing>
+<figcaption><a href="#listing-17-41">Listing 17-41</a>: <code>get_intervals</code> 함수에 async <code>trpl</code> API 대신 <code>std::thread</code> API를 사용하는 예시</figcaption>
+</figure>
 <p>이 코드를 실행하면, 출력 결과는 Listing 17-40과 완전히 동일합니다. 그리고 호출하는 코드의 관점에서 보면, 변경된 부분이 거의 없다는 점도 주목할 만합니다. 더 나아가, 한 함수는 런타임에서 async 태스크를 생성하고, 다른 함수는 OS 스레드를 생성했음에도 불구하고, 결과로 만들어진 스트림에는 아무런 영향이 없었습니다.</p>
 <p>비슷해 보이지만, 이 두 방식은 실제로는 매우 다르게 동작합니다. 물론 이처럼 단순한 예제에서는 그 차이를 측정하기 어려울 수 있습니다. 하지만 현대의 개인용 컴퓨터에서는 수백만 개의 async 태스크를 생성할 수 있습니다. 만약 같은 수의 스레드를 생성하려고 한다면, 실제로 메모리가 모두 소진될 것입니다!</p>
 <p>이러한 API들이 서로 비슷한 이유가 있습니다. 스레드는 동기 작업 집합의 경계 역할을 하며, 스레드 <em>간</em> 동시성이 가능합니다. 태스크는 <em>비동기</em> 작업 집합의 경계 역할을 하며, 태스크 <em>간</em> 뿐만 아니라 태스크 <em>내부</em> 에서도 동시성이 가능합니다. 왜냐하면 태스크는 자신의 본문에서 여러 future 사이를 전환할 수 있기 때문입니다. 마지막으로, future는 러스트에서 가장 세분화된 동시성 단위이며, 각 future는 다른 future들의 트리를 나타낼 수 있습니다. 런타임, 특히 executor가 태스크를 관리하고, 태스크가 future를 관리합니다. 이런 점에서 태스크는 운영 체제가 아닌 런타임이 관리하는, 추가적인 기능이 더해진 경량 스레드와 비슷하다고 할 수 있습니다.</p>
@@ -243,7 +245,8 @@
 <li>작업이 <em>매우 동시성</em> 이 요구된다면, 예를 들어 다양한 소스에서 서로 다른 간격이나 속도로 들어오는 메시지를 처리해야 하는 경우라면, async가 더 적합합니다.</li>
 </ul>
 <p>그리고 병렬성과 동시성이 모두 필요하다면, 스레드와 async 중 하나만 선택할 필요가 없습니다. 두 가지를 자유롭게 함께 사용할 수 있으며, 각각이 가장 잘하는 역할을 맡길 수 있습니다. 예를 들어, Listing 17-42는 실제 러스트 코드에서 이러한 조합이 흔히 사용되는 예시를 보여줍니다.</p>
-<Listing number="17-42" caption="스레드에서 블로킹 코드로 메시지를 보내고, async 블록에서 메시지를 기다리는 예시" file-name="src/main.rs">
+<figure class="listing" id="listing-17-42">
+<span class="file-name">Filename: src/main.rs</span>
 <pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate trpl; // for mdbook test
 </span><span class="boring">
 </span>use std::{thread, time::Duration};
@@ -264,7 +267,8 @@ fn main() {
         }
     });
 }</code></pre></pre>
-</Listing>
+<figcaption><a href="#listing-17-42">Listing 17-42</a>: 스레드에서 블로킹 코드로 메시지를 보내고, async 블록에서 메시지를 기다리는 예시</figcaption>
+</figure>
 <p>우선 async 채널을 생성한 뒤, 채널의 sender 쪽 소유권을 넘겨받는 스레드를 하나 생성합니다. 이 스레드 안에서는 1부터 10까지의 숫자를 1초씩 쉬면서 전송합니다. 마지막으로, 이번 장에서 계속 사용해온 것처럼 <code>trpl::run</code>에 async 블록을 넘겨 future를 실행합니다. 이 future 안에서는 앞서 살펴본 메시지 전달 예제들과 마찬가지로, 해당 메시지들을 await 합니다.</p>
 <p>이번 장의 서두에서 언급했던 시나리오로 돌아가 보겠습니다. 예를 들어, 비디오 인코딩 작업처럼 계산 집약적인 작업은 전용 스레드에서 실행하고, 해당 작업이 끝났다는 사실을 UI에 알릴 때는 async 채널을 사용하는 상황을 생각해 볼 수 있습니다. 실제로 이런 식의 조합은 현실 세계의 다양한 사용 사례에서 무수히 많이 등장합니다.</p>
 <h2 id="정리"><a class="header" href="#정리">정리</a></h2>

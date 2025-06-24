@@ -70,7 +70,7 @@ help: there is a method `try_next` with a similar name
 
 이 모든 요소들을 조합하면, 이제 코드는 우리가 원하는 대로 동작합니다! 게다가 이제 `StreamExt`가 스코프에 있으므로, 이터레이터에서처럼 다양한 유틸리티 메서드들을 모두 사용할 수 있습니다. 예를 들어, Listing 17-32에서는 `filter` 메서드를 사용해 3과 5의 배수만 남기고 나머지를 걸러냅니다.
 
-<Listing number="17-32" caption="Filtering a stream with the `StreamExt::filter` method" file-name="src/main.rs">
+<Listing number="17-32" caption="`StreamExt::filter` 메서드로 스트림을 필터링하기" file-name="src/main.rs">
 
 ```rust
 {{#rustdoc_include ../listings/ch17-async-await/listing-17-32/src/main.rs:all}}
